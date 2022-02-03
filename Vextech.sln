@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vextech APP", "Vextech APP\Vextech APP.csproj", "{02739F83-DA91-4A17-A286-DB710B8A5293}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vextech API", "Vextech API\Vextech API.csproj", "{46429E77-2CE0-46C4-ADCA-FA2B208DFBBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02739F83-DA91-4A17-A286-DB710B8A5293}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02739F83-DA91-4A17-A286-DB710B8A5293}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02739F83-DA91-4A17-A286-DB710B8A5293}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02739F83-DA91-4A17-A286-DB710B8A5293}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46429E77-2CE0-46C4-ADCA-FA2B208DFBBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46429E77-2CE0-46C4-ADCA-FA2B208DFBBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46429E77-2CE0-46C4-ADCA-FA2B208DFBBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46429E77-2CE0-46C4-ADCA-FA2B208DFBBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C48E7F68-A866-4B16-B6D9-3078E802E2E0}
+	EndGlobalSection
+EndGlobal
