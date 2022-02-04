@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
+using Vextech_API.Models.ViewModels;
 
 namespace Vextech_API.Controllers
 {
@@ -57,7 +58,13 @@ namespace Vextech_API.Controllers
                 sql = @"INSERT INTO storage_category (Category) VALUES (@Category);";
                 var result = SqlDataAccess.SaveData<StorageCategoryModel>(sql, data);
 
-                return Ok();
+                if (result == 0)
+                {
+                    this.StatusCode(StatusCodes.Status500InternalServerError, "An error has occoured and your storage category was not created.");
+                }
+
+
+                return Ok("Succes");
             }
             catch (Exception)
             {
@@ -74,7 +81,61 @@ namespace Vextech_API.Controllers
                 sql = $"UPDATE storage_category SET Category = \"{category}\" WHERE ID = {id};";
                 var result = SqlDataAccess.UpdateData(sql);
 
-                return Ok();
+                if (result == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected does not exist anymore in the database. Nothing got updated");
+                }
+
+                return Ok("Succes");
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        public List<StorageModel> Remapping { get; set; } = new List<StorageModel>();
+
+        [HttpGet]
+        public ActionResult<List<StorageModel>> GetStorages()
+        {
+            try
+            {
+                string sql;
+                sql = $"SELECT storage.ID, storage.StorageCatID, storage_category.Category, storage.AddressID, addresses.Address, addresses.PostNumberID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.Country FROM storage INNER JOIN storage_category ON storage.ID = storage_category.ID INNER JOIN addresses ON storage.AddressID = addresses.ID INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID;";
+                var result = SqlDataAccess.LoadData<VStorageModel>(sql);
+
+                foreach (var storage in result)
+                {
+                    StorageModel model = new StorageModel()
+                    {
+                        ID = storage.ID,
+                        StorageCat = new StorageCategoryModel()
+                        {
+                            ID = storage.StorageCatID,
+                            Category = storage.Category,
+                        },
+                        Address = new AddressModel()
+                        {
+                            ID = storage.AddressID,
+                            Address = storage.Address,
+                            PostNumber = new post_numbers()
+                            {
+                                ID = storage.PostNumberID,
+                                PostNumber = storage.PostNumber,
+                                City = storage.City,
+                                Country = new CountryModel()
+                                {
+                                    ID = storage.CountryID,
+                                    Country = storage.Country,
+                                }
+                            }
+                        },
+                    };
+                    Remapping.Add(model);
+                }
+
+                return Remapping;
             }
             catch (Exception)
             {
