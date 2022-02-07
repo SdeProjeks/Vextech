@@ -2,8 +2,7 @@
 {
     public class ProductBrandModel : IProductBrandModel
     {
+        public int ID { get; set; }
         public string Brand { get; set; }
-
-        public int ID { get; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿namespace Vextech_API.Models.ViewModels
 {
-    public class VProductCategoriesModel : IProductCategoriesModel
+    public class VProductCategoriesModel
     {
-        public ProductCategoryNameModel CategoryID { get; set; }
-        public ProductModel ProductID { get; set; }
+        public int ProductID { get; set; }
+        public int CategoryID { get; set; }
+        public int Subcategory { get; set; }
+        public string Category { get; set; }
     }
 }

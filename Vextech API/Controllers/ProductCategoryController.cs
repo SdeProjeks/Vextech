@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
+using Vextech_API.Models.ViewModels;
 
 namespace Vextech_API.Controllers
 {
