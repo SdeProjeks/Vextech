@@ -6,9 +6,9 @@
         public ProductBrandModel Brand { get; set; }
         public string Name { get; set; }
         public string Descrption { get; set; }
-        public bool Active { get; set; } = false;
+        public int Active { get; set; } = 0;
         public decimal Price { get; set; }
-        public DateTime Release_date { get; set; }
+        public DateTime? Release_date { get; set; }
         public List<ProductCategoryNameModel> Categories { get; set; }
     }
 }
