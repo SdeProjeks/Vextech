@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
+using System.Data;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using Dapper.Mapper;
+
 
 namespace Vextech_API.Controllers
 {
@@ -17,32 +22,34 @@ namespace Vextech_API.Controllers
             try
             {
                 string sql;
-                sql = $"SELECT addresses.ID,addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country FROM addresses INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID;";
-                var databaseresult = SqlDataAccess.LoadData<VAddressModel>(sql).ToArray<VAddressModel>();
-
-                foreach (var Address in databaseresult)
+                sql = $"SELECT addresses.ID, addresses.Address, addresses.PostNumberID" +
+                    $", post_numbers.ID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID" +
+                    $", countries.ID, countries.Country " +
+                    $"FROM addresses " +
+                    $"INNER JOIN post_numbers " +
+                    $"ON addresses.PostNumberID = post_numbers.ID " +
+                    $"INNER JOIN countries " +
+                    $"ON post_numbers.CountryID = countries.ID;";
+                using (IDbConnection cnn = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    AddressModel remapping = new AddressModel()
+                   
+                    var list = cnn.Query<AddressModel,PostNumberModel,CountrieModel,AddressModel>(
+                    sql,
+                    (AddressModel, PostNumberModel,CountriesModel) =>
                     {
-                        ID = Address.ID,
-                        Address = Address.Address,
-                        PostNumber = new post_numbers()
-                        {
-                            ID = Address.PostNumberID,
-                            PostNumber = Address.PostNumber,
-                            City = Address.City,
-                            Country = new CountryModel()
-                            {
-                                ID = Address.CountryID,
-                                Country = Address.Country
-                            }
-                        }
-                    };
-                    result.Add(remapping);
-                };
+                        AddressModel.PostNumberID = PostNumberModel;
+                        AddressModel.PostNumberID.CountryID = CountriesModel;
+                        
+                        return AddressModel;
+                    },
+                    splitOn: "PostNumberID, CountryID")
+                    .Distinct()
+                    .ToList();
 
+                    return list;
+                }
 
-                return result;
+                   
             }
             catch (Exception)
             {
@@ -55,33 +62,35 @@ namespace Vextech_API.Controllers
         {
             try
             {
+               
                 string sql;
-                sql = $"SELECT addresses.ID,addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country FROM addresses INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID WHERE Addresses.ID = {id};";
-                var databaseresult = SqlDataAccess.LoadData<VAddressModel>(sql).ToArray<VAddressModel>();
-
-                foreach (var Address in databaseresult)
+                sql = $"SELECT addresses.ID, addresses.Address, addresses.PostNumberID" +
+                    $", post_numbers.ID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID" +
+                    $", countries.ID, countries.Country " +
+                    $"FROM addresses " +
+                    $"INNER JOIN post_numbers " +
+                    $"ON addresses.PostNumberID = post_numbers.ID " +
+                    $"INNER JOIN countries " +
+                    $"ON post_numbers.CountryID = countries.ID " +
+                    $"WHERE Addresses.ID = {id};";
+                using (IDbConnection cnn = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    AddressModel remapping = new AddressModel()
+
+                    var list = cnn.Query<AddressModel, PostNumberModel, CountrieModel, AddressModel>(
+                    sql,
+                    (AddressModel, PostNumberModel, CountriesModel) =>
                     {
-                        ID = Address.ID,
-                        Address = Address.Address,
-                        PostNumber = new post_numbers()
-                        {
-                            ID = Address.PostNumberID,
-                            PostNumber = Address.PostNumber,
-                            City = Address.City,
-                            Country = new CountryModel()
-                            {
-                                ID = Address.CountryID,
-                                Country = Address.Country
-                            }
-                        }
-                    };
-                    result.Add(remapping);
-                };
+                        AddressModel.PostNumberID = PostNumberModel;
+                        AddressModel.PostNumberID.CountryID = CountriesModel;
 
+                        return AddressModel;
+                    },
+                    splitOn: "PostNumberID, CountryID")
+                    .Distinct()
+                    .ToList();
 
-                return result;
+                    return list;
+                }
             }
             catch (Exception)
             {

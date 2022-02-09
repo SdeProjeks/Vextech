@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
+using System.Data;
 using Vextech_API.DataAccess;
 using Vextech_API.Models.ViewModels;
+using Dapper.Mapper;
 
 namespace Vextech_API.Controllers
 {
@@ -8,37 +12,39 @@ namespace Vextech_API.Controllers
     [ApiController]
     public class Postnumber : ControllerBase
     {
-        public List<post_numbers> result = new List<post_numbers>();
-
 
         [HttpGet]
-        public ActionResult<List<post_numbers>> GetPostNumberByID(int id)
+        public ActionResult<List<PostNumberModel>> GetPostNumberByID(int id)
         {
             try
             {
                 string sql;
-                sql = $"SELECT post_numbers.ID, countries.ID, countries.Country, PostNumber, City FROM post_numbers INNER JOIN countries ON post_numbers.CountryID = countries.ID WHERE post_numbers.ID = {id};";
-                var databaseresult = SqlDataAccess.LoadData<VPostNumberModel>(sql).ToArray<VPostNumberModel>();
+                
+                sql = $"SELECT post_numbers.ID,  post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.ID, countries.Country " +
+                    $"FROM post_numbers " +
+                    $"INNER JOIN countries " +
+                    $"ON post_numbers.CountryID = countries.ID " +
+                    $"WHERE post_numbers.ID = {id};";
 
-                foreach (var postnumber in databaseresult)
+                using (IDbConnection cnn = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    post_numbers remapping = new post_numbers()
+                    
+                    var postNumbers = cnn.Query<PostNumberModel, CountrieModel, PostNumberModel>(sql, (PostNumberModel, CountriesModel) =>
                     {
-                        ID = postnumber.ID,
-                        Country = new CountryModel() { ID = postnumber.CountryID, Country = postnumber.Country },
-                        PostNumber = postnumber.PostNumber,
-                        City = postnumber.City,
-                    };
-                    result.Add(remapping);
-                };
+                        PostNumberModel.CountryID = CountriesModel;
+
+                        return PostNumberModel;
+                    }, splitOn: "CountryID").Distinct().ToList();
 
 
-                return result;
+                    return Ok(postNumbers);
+                }
             }
             catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
+                       
     }
 }

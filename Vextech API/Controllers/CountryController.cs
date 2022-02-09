@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using Vextech_API.DataAccess;
+using Dapper;
+using MySqlConnector;
+using Dapper.Mapper;
 
 namespace Vextech_API.Controllers
 {
@@ -8,15 +12,19 @@ namespace Vextech_API.Controllers
     public class Country : ControllerBase
     {
         [HttpGet]
-        public ActionResult<CountryModel[]> GetCountryByID(int id)
+        public ActionResult<List<CountrieModel>> GetCountryByID(int id)
         {
             try
             {
                 string sql;
                 sql = $"SELECT ID, Country FROM countries WHERE ID = {id};";
-                var result = SqlDataAccess.LoadData<CountryModel>(sql).ToArray();
 
-                return result;
+                using (IDbConnection cnn = new MySqlConnection(SqlDataAccess.GetConnectionString()))
+                {
+                    var county = cnn.Query<CountrieModel>(sql).ToList();
+
+                    return county;
+                }
             }
             catch (Exception)
             {
