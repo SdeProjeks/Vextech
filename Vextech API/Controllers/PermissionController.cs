@@ -68,7 +68,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult<int> UpdatePermissionByID(int id, string name)
+        public ActionResult<int> UpdatePermissionByName(ulong id, string name)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace Vextech_API.Controllers
                 };
 
                 string sql;
-                sql = @"INSERT INTO permissions (Name) VALUES (@Name);";
+                sql = $"UPDATE permissions SET Name = '{name}' WHERE ID = {id}";
 
                 var result = SqlDataAccess.UpdateData(sql);
 

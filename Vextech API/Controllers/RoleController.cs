@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Vextech_API.DataAccess;
+using Vextech_API.Models;
+using Vextech_API.Models.ViewModels;
 
 namespace Vextech_API.Controllers
 {
@@ -7,5 +10,205 @@ namespace Vextech_API.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
+        [HttpGet]
+        public ActionResult<List<RoleModel>> GetRoles()
+        {
+            try
+            {
+                string sql;
+                sql = "SELECT * FROM roles;";
+
+                var result = SqlDataAccess.LoadData<RoleModel>(sql);
+                
+                return result;
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<List<RoleModel>> GetRoleByID(int id)
+        {
+            try
+            {
+                string sql;
+                sql = $"SELECT * FROM roles WHERE ID = {id};";
+
+                var result = SqlDataAccess.LoadData<RoleModel>(sql);
+
+                return result;
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CreateRole(string name)
+        {
+            try
+            {
+                RoleModel data = new RoleModel()
+                {
+                    Name = name
+                };
+                string sql;
+                sql = @"INSERT INTO roles (name) VALUES (@Name);";
+                
+                var result = SqlDataAccess.SaveData<RoleModel>(sql,data);
+
+                if (result == 0)
+	            {
+                     return this.StatusCode(StatusCodes.Status500InternalServerError, "Role was not created");
+	            }else
+	            {
+                    return Ok("Role created succesfully");
+	            }
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpPut]
+        public ActionResult UpdateRoleByName(ulong id, string name) 
+        {
+            try 
+	        {
+                RoleModel data = new RoleModel()
+                {
+                    ID = id,
+                    Name = name
+                };
+                string sql;
+                sql = $"UPDATE roles SET Name = '{name}' WHERE ID = {id};";
+
+                var result = SqlDataAccess.UpdateData(sql);
+                if (result == 0)
+	            {
+                     return this.StatusCode(StatusCodes.Status500InternalServerError, "Role Update failed");
+	            }else
+	            {
+                    return Ok("Role updated succesfully");
+	            }
+	        }
+	        catch (Exception)
+	        {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+	        }
+        }
+
+
+
+        public List<RoleHasPermissionModel> result = new List<RoleHasPermissionModel>();
+
+
+        [HttpGet]
+        public ActionResult<List<RoleHasPermissionModel>> GetRoleHasPermissions()
+        {
+            try 
+	        {	        
+	        	string sql;
+                sql = "SELECT role_has_permission.RoleID,roles.Name AS RoleName,role_has_permission.PermissionID,permissions.Name AS PermissionName FROM role_has_permission INNER JOIN roles ON role_has_permission.RoleID = roles.ID INNER JOIN permissions ON role_has_permission.PermissionID = permissions.ID;";
+                
+                var DatabaseResult = SqlDataAccess.LoadData<VRoleHasPermissionModel>(sql).ToArray<VRoleHasPermissionModel>();
+
+                foreach (var RolePermissions in DatabaseResult)
+	            {
+                    RoleHasPermissionModel remaping = new RoleHasPermissionModel()
+                    {
+                        Role = new RoleModel()
+                        {
+                            ID = RolePermissions.RoleID,
+                            Name = RolePermissions.RoleName,
+                        },
+                        Permission = new PermissionModel()
+                        {
+                            ID = RolePermissions.PermissionID,
+                            Name = RolePermissions.PermissionName,
+                        }
+                        
+                    };
+                    result.Add(remaping);
+	            }
+                return result;
+	        }
+	        catch (Exception)
+	        {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+	        }
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<List<RoleHasPermissionModel>> GetOneRolesPermissions(int id)
+        {
+            try
+            {
+                string sql;
+                sql = $"SELECT role_has_permission.RoleID,roles.Name AS RoleName,role_has_permission.PermissionID,permissions.Name AS PermissionName FROM role_has_permission INNER JOIN roles ON role_has_permission.RoleID = roles.ID INNER JOIN permissions ON role_has_permission.PermissionID = permissions.ID WHERE role_has_permission.RoleID = {id};";
+
+                var DatabaseResult = SqlDataAccess.LoadData<VRoleHasPermissionModel>(sql).ToArray<VRoleHasPermissionModel>();
+
+                foreach (var RolePermissions in DatabaseResult)
+                {
+                    RoleHasPermissionModel remaping = new RoleHasPermissionModel()
+                    {
+                        Role = new RoleModel()
+                        {
+                            ID = RolePermissions.RoleID,
+                            Name = RolePermissions.RoleName
+                        },
+                        Permission = new PermissionModel()
+                        {
+                            ID = RolePermissions.PermissionID,
+                            Name = RolePermissions.PermissionName
+                        }
+                    };
+                    result.Add(remaping);
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpPut]
+        public ActionResult CreateAndUpdateRolePermission (ulong role_id, List<ulong>? permissions)
+        {
+            try
+            {
+                string sql;
+                sql = $"DELETE FROM role_has_permission WHERE RoleID = {role_id}";
+                var deleteResult = SqlDataAccess.DeleteData(sql);
+
+                if (permissions != null)
+                {
+                    foreach (var permissionID in permissions)
+                    {
+                        VRoleHasPermissionModel data = new VRoleHasPermissionModel()
+                        {
+                            RoleID = role_id,
+                            PermissionID = permissionID
+                        };
+
+                        sql = @"INSERT INTO role_has_permission (RoleID,PermissionID) VALUES (@RoleID,@PermissionID)";
+                        var result = SqlDataAccess.SaveData<VRoleHasPermissionModel>(sql, data);
+                    }
+                }
+
+                return Ok("Role updated Succesfully");
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+
+        }
     }
 }
