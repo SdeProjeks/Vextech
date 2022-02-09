@@ -57,12 +57,12 @@ namespace Vextech_API.Controllers
                         {
                             ID = user.AddressID,
                             Address = user.Address,
-                            PostNumber = new()
+                            PostNumberID = new()
                             {
                                 ID = user.PostNumberID,
                                 PostNumber = user.PostNumber,
                                 City = user.City,
-                                Country = new()
+                                CountryID = new()
                                 {
                                     ID = user.CountryID,
                                     Country = user.Country
@@ -131,12 +131,12 @@ namespace Vextech_API.Controllers
                         {
                             ID = user.AddressID,
                             Address = user.Address,
-                            PostNumber = new()
+                            PostNumberID = new()
                             {
                                 ID = user.PostNumberID,
                                 PostNumber = user.PostNumber,
                                 City = user.City,
-                                Country = new()
+                                CountryID = new()
                                 {
                                     ID = user.CountryID,
                                     Country = user.Country

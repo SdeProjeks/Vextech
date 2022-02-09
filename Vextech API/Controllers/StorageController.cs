@@ -119,12 +119,12 @@ namespace Vextech_API.Controllers
                         {
                             ID = storage.AddressID,
                             Address = storage.Address,
-                            PostNumber = new post_numbers()
+                            PostNumberID = new PostNumberModel()
                             {
                                 ID = storage.PostNumberID,
                                 PostNumber = storage.PostNumber,
                                 City = storage.City,
-                                Country = new CountryModel()
+                                CountryID = new CountrieModel()
                                 {
                                     ID = storage.CountryID,
                                     Country = storage.Country,
@@ -172,12 +172,12 @@ namespace Vextech_API.Controllers
                         {
                             ID = storage.AddressID,
                             Address = storage.Address,
-                            PostNumber = new post_numbers()
+                            PostNumberID = new PostNumberModel()
                             {
                                 ID = storage.PostNumberID,
                                 PostNumber = storage.PostNumber,
                                 City = storage.City,
-                                Country = new CountryModel()
+                                CountryID = new CountrieModel()
                                 {
                                     ID = storage.CountryID,
                                     Country = storage.Country,
