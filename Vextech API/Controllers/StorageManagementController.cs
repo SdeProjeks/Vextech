@@ -100,17 +100,20 @@ namespace Vextech_API.Controllers
         }
 
 
-        //[HttpDelete]
-        //public ActionResult DeleteProductFromStorage(int storageID, int productID)
-        //{
-        //    try
-        //    {
+        [HttpDelete]
+        public ActionResult DeleteProductFromStorage(int storageID, int productID)
+        {
+            try
+            {
+                string sql = $"DELETE FROM storage_products WHERE StorageID={storageID} AND ProductID={productID};";
+                var result = SqlDataAccess.DeleteData(sql);
 
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
-        //    }
-        //}
+                return Ok("Product has been removed from the storage.");
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
+        }
     }
 }
