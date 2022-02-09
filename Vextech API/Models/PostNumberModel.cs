@@ -1,9 +1,9 @@
 ﻿namespace Vextech_API
 {
-    public class post_numbers
+    public class PostNumberModel
     {
         public int ID { get; set; }
-        public CountryModel Country { get; set; }
+        public CountrieModel CountryID { get; set; }
         public string PostNumber { get; set; }
         public string City { get; set; }
     }
