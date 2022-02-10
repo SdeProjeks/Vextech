@@ -7,9 +7,17 @@ namespace Vextech_API.DataAccess
 {
     public static class SqlDataAccess
     {
-        public static string GetConnectionString(string connectionName = "server=localhost;user id=root;Pwd=password;database=mvccallwebapih3;persistsecurityinfo=True; allowuservariables=True")
+        
+        public static string GetConnectionString()
         {
-            return connectionName;
+            //find and converts appsettings.json to valus/key
+            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false);
+
+            IConfiguration config = builder.Build();
+
+            // get the connectionstring
+            return config.GetValue<string>("ConnectionStrings:MySQLConnection");
+
         }
 
         public static List<T> LoadData<T>(string sql)
