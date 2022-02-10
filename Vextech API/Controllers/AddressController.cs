@@ -46,10 +46,13 @@ namespace Vextech_API.Controllers
                     .Distinct()
                     .ToList();
 
-                    return list;
-                }
+                    if (list.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any addresses in the database.");
+                    }
 
-                   
+                    return list;
+                }   
             }
             catch (Exception)
             {
@@ -62,7 +65,6 @@ namespace Vextech_API.Controllers
         {
             try
             {
-               
                 string sql;
                 sql = $"SELECT addresses.ID, addresses.Address, addresses.PostNumberID" +
                     $", post_numbers.ID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID" +
@@ -88,6 +90,11 @@ namespace Vextech_API.Controllers
                     splitOn: "PostNumberID, CountryID")
                     .Distinct()
                     .ToList();
+
+                    if (list.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status204NoContent, "We could not find the address you were looking for in the database.");
+                    }
 
                     return list;
                 }

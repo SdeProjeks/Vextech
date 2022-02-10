@@ -25,16 +25,11 @@ namespace Vextech_API.Controllers
                 string sql = @"INSERT INTO contacts (Name, Email, Message) VALUES (@Name, @Email, @Message);";
                 var result = SqlDataAccess.SaveData<ContactModel>(sql, data);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest,"Due to bad inputs the message was not created on our side. Change your inputs and try again.");
-                }
-
                 return this.StatusCode(StatusCodes.Status201Created, "Your message has been recieved.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Due to bad inputs the message was not created on our side. Change your inputs and try again.");
             }
         }
 
@@ -89,16 +84,11 @@ namespace Vextech_API.Controllers
                 string sql = $"DELETE FROM contacts WHERE ID={contactID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the support ticket in the database nothing got deleted.");
-                }
-
                 return Ok("Contact was successfully deleted.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the support ticket in the database nothing got deleted.");
             }
         }
 

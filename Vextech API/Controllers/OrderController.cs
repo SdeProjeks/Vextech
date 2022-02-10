@@ -99,11 +99,6 @@ namespace Vextech_API.Controllers
                 string sql = @"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES (@UserID,@Address,@PostNumber,@Country)";
                 var result = SqlDataAccess.SaveData<VOrderModel>(sql, data);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
-                }
-
                 foreach (VOrderProductModel product in products)
                 {
                     sql = @"INSERT INTO order_products (OrderID, ProductID, Amount, Price) VALUES ((SELECT MAX(ID) FROM Orders),@ProductID,@Amount,@Price);";
@@ -114,7 +109,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
             }
         }
 
@@ -126,16 +121,11 @@ namespace Vextech_API.Controllers
                 string sql = $"UPDATE orders SET OrderStatusID={orderstatusID} WHERE ID={orderID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the order in the database.");
-                }
-
                 return Ok("Order status has been updated.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the order in the database.");
             }
         }
 
@@ -147,16 +137,11 @@ namespace Vextech_API.Controllers
                 string sql = $"DELETE FROM orders WHERE ID={orderID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database.");
-                }
-
                 return Ok("Order was successfully deleted.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database.");
             }
         }
 
@@ -173,16 +158,11 @@ namespace Vextech_API.Controllers
                 var sql = @"INSERT INTO order_status (Name) VALUES (@Name);";
                 var result = SqlDataAccess.SaveData<OrderStatusModel>(sql, data);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, "Your inputs are not proper and order category was not created try changing your input.");
-                }
-
                 return this.StatusCode(StatusCodes.Status201Created,"Order status has been created.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input order category was not created try changing your input.");
             }
         }
 
@@ -201,16 +181,11 @@ namespace Vextech_API.Controllers
                 var sql = @"UPDATE order_status SET Name=@Name WHERE ID=@ID;";
                 var result = SqlDataAccess.SaveData<OrderStatusModel>(sql, data);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database nothing was updated.");
-                }
-
                 return Ok("Order status has been updated.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database nothing was updated.");
             }
         }
     }

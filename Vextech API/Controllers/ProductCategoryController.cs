@@ -26,16 +26,12 @@ namespace Vextech_API.Controllers
                 string sql;
                 sql = @"INSERT INTO product_category_names (Category, Subcategory) VALUES (@Category, @Subcategory);";
                 var result = SqlDataAccess.SaveData<IProductCategoryNameModel>(sql, data);
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest,"Invalid input please change the input and try again.");
-                }
 
                 return this.StatusCode(StatusCodes.Status201Created,"Product category has been created.");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
             }
         }
 

@@ -21,9 +21,13 @@ namespace Vextech_API.Controllers
 
                 using (IDbConnection cnn = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    var county = cnn.Query<CountrieModel>(sql).ToList();
+                    var country = cnn.Query<CountrieModel>(sql).ToList();
 
-                    return county;
+                    if (country.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status204NoContent, "We could not find the country in the database.");
+                    }
+                    return country;
                 }
             }
             catch (Exception)

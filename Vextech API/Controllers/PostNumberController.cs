@@ -36,8 +36,12 @@ namespace Vextech_API.Controllers
                         return PostNumberModel;
                     }, splitOn: "CountryID").Distinct().ToList();
 
+                    if (postNumbers.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status204NoContent,"We could not find the postnumber in the database.");
+                    }
 
-                    return Ok(postNumbers);
+                    return postNumbers;
                 }
             }
             catch (Exception)

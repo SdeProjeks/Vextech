@@ -70,11 +70,6 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs please change your inputs and try again..");
-                }
-
-                if (result == 0)
-                {
                     this.StatusCode(StatusCodes.Status500InternalServerError, "An error has occoured and your storage category was not created.");
                 }
 
@@ -83,7 +78,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs please change your inputs and try again.");
             }
         }
 
@@ -96,16 +91,11 @@ namespace Vextech_API.Controllers
                 sql = $"UPDATE storage_category SET Category = \"{category}\" WHERE ID = {id};";
                 var result = SqlDataAccess.UpdateData(sql);
 
-                if (result == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected was not found in the database nothing got updated");
-                }
-
                 return Ok("Succes");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected was not found in the database nothing got updated");
             }
         }
 
@@ -231,17 +221,11 @@ namespace Vextech_API.Controllers
                 sql = @"INSERT INTO storage (StorageCatID, AddressID) VALUES (@StorageCatID, @AddressID);";
                 var result = SqlDataAccess.SaveData<VStorageModel>(sql, data);
 
-                if (result == 0)
-                {
-                    this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
-                }
-
-
                 return this.StatusCode(StatusCodes.Status201Created,"Succes");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
             }
         }
 
@@ -255,17 +239,11 @@ namespace Vextech_API.Controllers
                 sql = $"UPDATE storage SET StorageCatID={categoryID}, AddressID={addressID} WHERE ID = {id};";
                 var result = SqlDataAccess.UpdateData(sql);
 
-                if (result == 0)
-                {
-                    this.StatusCode(StatusCodes.Status404NotFound, "Storage not found in the database nothing was updated.");
-                }
-
-
                 return Ok("Succes");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "Storage not found in the database nothing was updated.");
             }
         }
     }

@@ -266,12 +266,6 @@ namespace Vextech_API.Controllers
                 string sql = @"INSERT INTO products (Name, Description, BrandID, Price, Release_date, Active) VALUES (@Name, @Description, @BrandID, @Price, @Release_date, @Active)";
                 var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
 
-                if (results == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs. Please change your inputs and try again.");
-                }
-
-
                 foreach (var category in categories)
                 {
                     VProductCategoriesModel categoryModel = new()
@@ -286,7 +280,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs. Please change your inputs and try again.");
             }
         }
 
@@ -309,11 +303,6 @@ namespace Vextech_API.Controllers
                 string sql = @"UPDATE products SET Name=@Name, Description=@Description, BrandID=@BrandID, Price=@Price, Release_date=@Release_date, Active=@Active WHERE ID = @ID;";
                 var results = SqlDataAccess.SaveData<VProductModel>(sql,data);
 
-                if (results == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We did not find the product to update in the database nothing was updated.");
-                }
-
                 // Delete all connected categories to then reapply them later
                 sql = $"DELETE FROM product_categories WHERE ProductID = {id}";
                 results = SqlDataAccess.DeleteData(sql);
@@ -334,7 +323,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We did not find the product to update in the database nothing was updated.");
             }
         }
 
@@ -354,16 +343,11 @@ namespace Vextech_API.Controllers
                 string sql = @"UPDATE products SET Active=@Active WHERE ID = @ID;";
                 var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
 
-                if (results == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made inactive.");
-                }
-
                 return Ok("Product was updated successfully made inactive");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made inactive.");
             }
         }
 
@@ -382,16 +366,11 @@ namespace Vextech_API.Controllers
                 string sql = @"UPDATE products SET Active=@Active WHERE ID = @ID;";
                 var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
 
-                if (results == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made active.");
-                }
-
                 return Ok("Product was updated successfully made active");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made active.");
             }
         }
     }
