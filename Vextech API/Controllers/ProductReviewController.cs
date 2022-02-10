@@ -196,6 +196,7 @@ namespace Vextech_API.Controllers
             }
         }
 
+        [HttpDelete]
         public ActionResult DeleteOneReview(int id, int userID)
         {
             try
