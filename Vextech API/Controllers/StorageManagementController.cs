@@ -21,6 +21,11 @@ namespace Vextech_API.Controllers
                 string sql = $"SELECT products.Name, storage_products.Quantity FROM storage_products INNER JOIN products ON storage_products.ProductID = products.ID WHERE storage_products.StorageID = {id};";
                 var result = SqlDataAccess.LoadData<VStorageProductModel>(sql);
 
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change your input and try again.");
+                }
+
                 foreach (var item in result)
                 {
                     StorageProductModel model = new()
@@ -60,10 +65,10 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Database ran into some issues so product was not added to the storage.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change your input and try again.");
                 } 
 
-                return Ok("Product was successfully added to the storage");
+                return this.StatusCode(StatusCodes.Status201Created,"Product was successfully added to the storage");
             }
             catch (Exception)
             {
@@ -88,7 +93,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "An issue has been encountered the quantity was not updated.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product to update in the database nothing was updated.");
                 }
 
                 return Ok("Product quantity updated for the storage successfully.");
@@ -107,6 +112,11 @@ namespace Vextech_API.Controllers
             {
                 string sql = $"DELETE FROM storage_products WHERE StorageID={storageID} AND ProductID={productID};";
                 var result = SqlDataAccess.DeleteData(sql);
+
+                if (result == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product to delete in the database nothing was deleted.");
+                }
 
                 return Ok("Product has been removed from the storage.");
             }

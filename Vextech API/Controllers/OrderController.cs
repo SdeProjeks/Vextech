@@ -26,7 +26,7 @@ namespace Vextech_API.Controllers
                 // Checks if we got anything or not.
                 if (result.Count == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the system.");
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We could not find your order in the system.");
                 }
 
                 sql = $"SELECT order_products.Amount, order_products.Price, products.Name FROM order_products INNER JOIN products ON order_products.ProductID = products.ID WHERE OrderID = {orderID};";
@@ -101,7 +101,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an error your order was not created.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
                 }
 
                 foreach (VOrderProductModel product in products)
@@ -110,7 +110,7 @@ namespace Vextech_API.Controllers
                     SqlDataAccess.SaveData<VOrderProductModel>(sql, product);
                 }
 
-                return Ok("Order has been created. Time to wait you sorry excuse for a customer.");
+                return Ok("Order has been created.");
             }
             catch (Exception)
             {
@@ -128,7 +128,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an error your order was not created.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the order in the database.");
                 }
 
                 return Ok("Order status has been updated.");
@@ -149,7 +149,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an error your order was not created.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database.");
                 }
 
                 return Ok("Order was successfully deleted.");
@@ -175,10 +175,10 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an error so order status was not created.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Your inputs are not proper and order category was not created try changing your input.");
                 }
 
-                return Ok("Order status has been created.");
+                return this.StatusCode(StatusCodes.Status201Created,"Order status has been created.");
             }
             catch (Exception)
             {
@@ -203,7 +203,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an error so order status was not updated.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database nothing was updated.");
                 }
 
                 return Ok("Order status has been updated.");

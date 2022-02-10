@@ -23,6 +23,11 @@ namespace Vextech_API.Controllers
                 string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.Active = 1;";
                 var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
 
+                if (DatabaseResults.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                }
+
                 foreach (var item in DatabaseResults)
                 {
                     sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
@@ -73,6 +78,11 @@ namespace Vextech_API.Controllers
             {
                 string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id} AND products.Active = 1;";
                 var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
+
+                if (DatabaseResults.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                }
 
                 if (DatabaseResults.Count > 0)
                 {
@@ -130,6 +140,11 @@ namespace Vextech_API.Controllers
                 string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID;";
                 var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
 
+                if (DatabaseResults.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                }
+
                 foreach (var item in DatabaseResults)
                 {
                     sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
@@ -180,6 +195,11 @@ namespace Vextech_API.Controllers
             {
                 string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id};";
                 var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
+
+                if (DatabaseResults.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                }
 
                 if (DatabaseResults.Count > 0)
                 {
@@ -248,7 +268,7 @@ namespace Vextech_API.Controllers
 
                 if (results == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Some database issue has been encountered your product was not created.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs. Please change your inputs and try again.");
                 }
 
 
@@ -262,7 +282,7 @@ namespace Vextech_API.Controllers
                     results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
                 }
 
-                return Ok("Product was created successfully");
+                return this.StatusCode(StatusCodes.Status201Created,"Product was created successfully");
             }
             catch (Exception)
             {
@@ -291,17 +311,12 @@ namespace Vextech_API.Controllers
 
                 if (results == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Some database issue has been encountered your product was not updated.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We did not find the product to update in the database nothing was updated.");
                 }
 
                 // Delete all connected categories to then reapply them later
                 sql = $"DELETE FROM product_categories WHERE ProductID = {id}";
                 results = SqlDataAccess.DeleteData(sql);
-
-                if (results == 0)
-                {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Some database issue has been encountered your product did either not have any categories or database failed with deletion.");
-                }
 
                 // Create all the relation to the products categories.
                 foreach (var category in categories)
@@ -319,7 +334,6 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                throw;
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -342,7 +356,7 @@ namespace Vextech_API.Controllers
 
                 if (results == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Some database issue has been encountered your product has not been made inactive.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made inactive.");
                 }
 
                 return Ok("Product was updated successfully made inactive");
@@ -370,10 +384,10 @@ namespace Vextech_API.Controllers
 
                 if (results == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Some database issue has been encountered your product has not been made inactive.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product in the database product was not made active.");
                 }
 
-                return Ok("Product was updated successfully made inactive");
+                return Ok("Product was updated successfully made active");
             }
             catch (Exception)
             {

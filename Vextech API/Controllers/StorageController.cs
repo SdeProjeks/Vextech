@@ -19,6 +19,11 @@ namespace Vextech_API.Controllers
                 sql = $"SELECT * FROM storage_category;";
                 var result = SqlDataAccess.LoadData<StorageCategoryModel>(sql);
 
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent,"We did not find any storage categories in the database.");
+                }
+
                 return result;
             }
             catch (Exception)
@@ -35,6 +40,11 @@ namespace Vextech_API.Controllers
                 string sql;
                 sql = $"SELECT * FROM storage_category WHERE ID = {id};";
                 var result = SqlDataAccess.LoadData<StorageCategoryModel>(sql);
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the storage category in the database.");
+                }
 
                 return result;
             }
@@ -57,6 +67,11 @@ namespace Vextech_API.Controllers
                 string sql;
                 sql = @"INSERT INTO storage_category (Category) VALUES (@Category);";
                 var result = SqlDataAccess.SaveData<StorageCategoryModel>(sql, data);
+
+                if (result == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs please change your inputs and try again..");
+                }
 
                 if (result == 0)
                 {
@@ -83,7 +98,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected does not exist anymore in the database. Nothing got updated");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected was not found in the database nothing got updated");
                 }
 
                 return Ok("Succes");
@@ -104,6 +119,11 @@ namespace Vextech_API.Controllers
                 string sql;
                 sql = $"SELECT storage.ID, storage.StorageCatID, storage_category.Category, storage.AddressID, addresses.Address, addresses.PostNumberID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.Country FROM storage INNER JOIN storage_category ON storage.ID = storage_category.ID INNER JOIN addresses ON storage.AddressID = addresses.ID INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID;";
                 var result = SqlDataAccess.LoadData<VStorageModel>(sql);
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent,"No storages found in the database.");
+                }
 
                 foreach (var storage in result)
                 {
@@ -213,11 +233,11 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    this.StatusCode(StatusCodes.Status500InternalServerError, "An error has occoured and your storage category was not created.");
+                    this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
                 }
 
 
-                return Ok("Succes");
+                return this.StatusCode(StatusCodes.Status201Created,"Succes");
             }
             catch (Exception)
             {
@@ -237,7 +257,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    this.StatusCode(StatusCodes.Status500InternalServerError, "An error has occoured and your storage category was not created.");
+                    this.StatusCode(StatusCodes.Status404NotFound, "Storage not found in the database nothing was updated.");
                 }
 
 

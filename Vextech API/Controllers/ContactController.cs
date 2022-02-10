@@ -27,15 +27,14 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError,"The database encountered an error and your message was not delivered.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest,"Due to bad inputs the message was not created on our side. Change your inputs and try again.");
                 }
 
-                return Ok("Your message has been recieved.");
+                return this.StatusCode(StatusCodes.Status201Created, "Your message has been recieved.");
             }
             catch (Exception)
             {
-
-                throw;
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
 
@@ -46,6 +45,11 @@ namespace Vextech_API.Controllers
             {
                 var sql = "SELECT * FROM contacts";
                 var result = SqlDataAccess.LoadData<ContactModel>(sql);
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any support tickets in the database.");
+                }
 
                 return result;
             }
@@ -62,6 +66,11 @@ namespace Vextech_API.Controllers
             {
                 var sql = $"SELECT * FROM contacts WHERE ID={id}";
                 var result = SqlDataAccess.LoadData<ContactModel>(sql);
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the support ticket in the database.");
+                }
 
                 return result;
             }
@@ -82,7 +91,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "The database encountered an issue your contact was not deleted cause it could not be found.");
+                    return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the support ticket in the database nothing got deleted.");
                 }
 
                 return Ok("Contact was successfully deleted.");
