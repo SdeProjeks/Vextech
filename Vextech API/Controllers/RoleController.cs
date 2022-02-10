@@ -19,7 +19,12 @@ namespace Vextech_API.Controllers
                 sql = "SELECT * FROM roles;";
 
                 var result = SqlDataAccess.LoadData<RoleModel>(sql);
-                
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "There are no roles");
+                }
+
                 return result;
             }
             catch (Exception)
@@ -37,6 +42,11 @@ namespace Vextech_API.Controllers
                 sql = $"SELECT * FROM roles WHERE ID = {id};";
 
                 var result = SqlDataAccess.LoadData<RoleModel>(sql);
+
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "this is not the role you are looking for");
+                }
 
                 return result;
             }
@@ -59,18 +69,11 @@ namespace Vextech_API.Controllers
                 sql = @"INSERT INTO roles (name) VALUES (@Name);";
                 
                 var result = SqlDataAccess.SaveData<RoleModel>(sql,data);
-
-                if (result == 0)
-	            {
-                     return this.StatusCode(StatusCodes.Status500InternalServerError, "Role was not created");
-	            }else
-	            {
-                    return Ok("Role created succesfully");
-	            }
+                return Ok("Role created succesfully");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                     return this.StatusCode(StatusCodes.Status400BadRequest, "Role was not created, because of invalid data");
             }
         }
 
@@ -88,18 +91,13 @@ namespace Vextech_API.Controllers
                 sql = $"UPDATE roles SET Name = '{name}' WHERE ID = {id};";
 
                 var result = SqlDataAccess.UpdateData(sql);
-                if (result == 0)
-	            {
-                     return this.StatusCode(StatusCodes.Status500InternalServerError, "Role Update failed");
-	            }else
-	            {
-                    return Ok("Role updated succesfully");
-	            }
+
+                return Ok("Role updated succesfully");
 	        }
 	        catch (Exception)
-	        {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
-	        }
+            {
+                return this.StatusCode(StatusCodes.Status404NotFound, "Role Update failed, because the role was not found");
+            }
         }
 
 
@@ -135,6 +133,10 @@ namespace Vextech_API.Controllers
                     };
                     result.Add(remaping);
 	            }
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "There are no roles that has a permission");
+                }
                 return result;
 	        }
 	        catch (Exception)
@@ -169,6 +171,10 @@ namespace Vextech_API.Controllers
                         }
                     };
                     result.Add(remaping);
+                }
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "Could not find the role");
                 }
                 return result;
             }
@@ -206,7 +212,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "The roles permissions failed, because of invalid data");
             }
 
         }

@@ -2,7 +2,7 @@
 {
     public class UserModel
     {
-        public ulong Id { get; set; }
+        public ulong ID { get; set; }
         public RoleModel Role { get; set; }
         public AddressModel Address { get; set; }
         public string Email { get; set; }

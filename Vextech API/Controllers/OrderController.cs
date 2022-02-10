@@ -54,7 +54,7 @@ namespace Vextech_API.Controllers
                         ID = order.ID,
                         User = new()
                         {
-                            Id = order.UserID,
+                            ID = order.UserID,
                             Email = order.Email,
                             Firstname = order.firstname,
                             Lastname = order.lastname

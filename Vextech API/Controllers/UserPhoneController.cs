@@ -11,30 +11,7 @@ namespace Vextech_API.Controllers
     public class UserPhoneController : ControllerBase
     {
         public List<UserMobileModel> phoneNumbers { get; set; }
-
-        [HttpPost]
-        public ActionResult<List<VUserMobileModel>> CreatePhonenumber(ulong userID, ulong mobilCategoryID, string phoneNumber)
-        {
-            try
-            {
-                VUserMobileModel data = new VUserMobileModel()
-                {
-                    UserID = userID,
-                    MobileCategoryID = mobilCategoryID,
-                    PhoneNumber = phoneNumber
-                };
-
-                string sql;
-                sql = @"INSERT INTO user_phonenumbers (UserID,MobileCategoryID,PhoneNumber) VALUES (@UserID, @MobileCategoryID, @PhoneNumber)";
-                
-                var result = SqlDataAccess.SaveData(sql, data);
-                return Ok("Added your Phone Number succesfully");
-            }
-            catch (Exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
-            }
-        }
+        
         [HttpGet("{id:int}")]
         public ActionResult<List<UserMobileModel>> GetPhonenumberByUserID(ulong id)
         {
@@ -58,6 +35,10 @@ namespace Vextech_API.Controllers
                     };
                     phoneNumbers.Add(phonenumbers);
                 }
+                if (phoneNumbers.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "user has no phone numbers.");
+                }
                 return phoneNumbers;
                 
             }
@@ -65,7 +46,30 @@ namespace Vextech_API.Controllers
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
+        }
 
+        [HttpPost]
+        public ActionResult<List<VUserMobileModel>> CreatePhonenumber(ulong userID, ulong mobilCategoryID, string phoneNumber)
+        {
+            try
+            {
+                VUserMobileModel data = new VUserMobileModel()
+                {
+                    UserID = userID,
+                    MobileCategoryID = mobilCategoryID,
+                    PhoneNumber = phoneNumber
+                };
+
+                string sql;
+                sql = @"INSERT INTO user_phonenumbers (UserID,MobileCategoryID,PhoneNumber) VALUES (@UserID, @MobileCategoryID, @PhoneNumber)";
+                
+                var result = SqlDataAccess.SaveData(sql, data);
+                return Ok("Added your Phone Number succesfully");
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Phone number was not created because of invalid data");
+            }
         }
     }
 }

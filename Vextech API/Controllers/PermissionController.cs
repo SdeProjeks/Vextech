@@ -18,6 +18,11 @@ namespace Vextech_API.Controllers
 
                 var result = SqlDataAccess.LoadData<PermissionModel>(sql);
 
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "There are no permissions");
+                }
+
                 return result;
             }
             catch (Exception)
@@ -36,6 +41,11 @@ namespace Vextech_API.Controllers
 
                 var result = SqlDataAccess.LoadData<PermissionModel>(sql);
 
+                if (result.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "Could not find the permission");
+                }
+
                 return result;
             }
             catch (Exception)
@@ -45,7 +55,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult<int> CreatePermission(string name)
+        public ActionResult CreatePermission(string name)
         {
             try
             {
@@ -58,17 +68,17 @@ namespace Vextech_API.Controllers
                 sql = @"INSERT INTO permissions (Name) VALUES (@Name);";
 
                 var result = SqlDataAccess.SaveData<PermissionModel>(sql, data);
-
-                return result;
+                
+                return Ok("Created the permission succcesfully");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Created failed because of invalid input");
             }
         }
 
         [HttpPut]
-        public ActionResult<int> UpdatePermissionByName(ulong id, string name)
+        public ActionResult UpdatePermissionByName(ulong id, string name)
         {
             try
             {
@@ -83,12 +93,11 @@ namespace Vextech_API.Controllers
 
                 var result = SqlDataAccess.UpdateData(sql);
 
-                return result;
+                return Ok("permission Updated succesfully");
             }
             catch (Exception)
             {
-
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "Update failed either because of invalid data or we could not find it");
             }
         }
     }

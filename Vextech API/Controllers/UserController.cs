@@ -47,7 +47,7 @@ namespace Vextech_API.Controllers
 
                     UserModel users = new()
                     {
-                        Id = user.ID,
+                        ID = user.ID,
                         Role = new()
                         {
                             ID = user.RoleID,
@@ -77,6 +77,10 @@ namespace Vextech_API.Controllers
                         PhoneNumbers = phonenumbers
                     };
                     Users.Add(users);
+                }
+                if (Users.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "There is no users");
                 }
                 return Users;
             }
@@ -121,7 +125,7 @@ namespace Vextech_API.Controllers
 
                     UserModel users = new()
                     {
-                        Id = user.ID,
+                        ID = user.ID,
                         Role = new()
                         {
                             ID = user.RoleID,
@@ -152,6 +156,11 @@ namespace Vextech_API.Controllers
                     };
                     Users.Add(users);
                 }
+
+                if (Users.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "user not found");
+                }
                 return Users;
             }
             catch (Exception)
@@ -161,13 +170,12 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateUser(ulong roleID, int addressID, string email, string firstname, string lastname, string password, string? vatID)
+        public ActionResult CreateUser(int addressID, string email, string firstname, string lastname, string password, string? vatID)
         {
             try
             {
                 VUserModel data = new()
                 {
-                    RoleID = roleID,
                     AddressID = addressID,
                     Email = email,
                     Firstname = firstname,
@@ -176,14 +184,15 @@ namespace Vextech_API.Controllers
                     VatID = vatID
                 };
                 string sql;
-                sql = @"INSERT INTO users (RoleID,AddressID,Email,Firstname,Lastname,Password,VatID) VALUES (@RoleID,@AddressID,@Email,@Firstname,@Lastname,@Password,@VatID);";
+                sql = @"INSERT INTO users (AddressID,Email,Firstname,Lastname,Password,VatID) VALUES (@AddressID,@Email,@Firstname,@Lastname,@Password,@VatID);";
                 
                 var result = SqlDataAccess.SaveData<VUserModel>(sql, data);
+
                 return Ok("Created user succesfully");
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status400BadRequest, "created user Failed, because of invalid data");
             }
         }
 
@@ -198,7 +207,7 @@ namespace Vextech_API.Controllers
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "A database issue has been encountered the user was not updated.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "user was not updated either because of invalid data or not found");
                 }
 
                 // Deleting the users phone
@@ -220,7 +229,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status404NotFound, "User not found or invalid data");
             }
 
         }
