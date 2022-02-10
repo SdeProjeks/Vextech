@@ -14,7 +14,6 @@ namespace Vextech_API.Controllers
     [ApiController]
     public class Address : ControllerBase
     {
-        public List<AddressModel> result = new List<AddressModel>();
 
         [HttpGet]
         public ActionResult<List<AddressModel>> GetAddresses()
