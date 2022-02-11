@@ -33,7 +33,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<List<StorageCategoryModel>> GetStorageCategories(int id)
+        public ActionResult<List<StorageCategoryModel>> GetStorageCategory(int id)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace Vextech_API.Controllers
 
 
         [HttpGet("{id:int}")]
-        public ActionResult<List<StorageModel>> GetStorages(int id)
+        public ActionResult<List<StorageModel>> GetStorage(int id)
         {
             try
             {
