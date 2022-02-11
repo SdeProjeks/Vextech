@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -17,6 +18,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 productReviews = new();
                 string sql;
                 sql = "SELECT products.Name, products.Price, users.Firstname, users.Lastname, product_reviews.ID, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID;";
@@ -49,8 +52,10 @@ namespace Vextech_API.Controllers
                 return productReviews;
                 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -59,6 +64,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 productReviews = new();
                 string sql;
                 sql = $"SELECT product_reviews.ID, products.Name, products.Price, products.Description, product_brand.Brand, users.Firstname, users.Lastname, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON product_brand.ID = products.BrandID WHERE product_reviews.ID = {id};";
@@ -97,8 +104,10 @@ namespace Vextech_API.Controllers
                 return productReviews;
                 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -107,6 +116,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 productReviews = new();
                 string sql;
                 sql = $"SELECT product_reviews.ID, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date, product_reviews.ProductID, products.Name, products.Price, products.Description, products.BrandID, product_brand.Brand, product_reviews.UserID, users.Firstname, users.Lastname FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {productID};";
@@ -146,8 +157,10 @@ namespace Vextech_API.Controllers
                 }
                 return productReviews;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -157,6 +170,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VProductReviewModel data = new()
                 {
                     ProductID = ProductID,
@@ -172,8 +187,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Review has been added");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Create failed because of invalid input");
             }
         }
@@ -183,6 +200,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"UDPATE product_reviews SET Comment='{Comment}', Rating = {Rating} WHERE ID = {ID}";
                 
@@ -190,8 +209,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Updated the review succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "Update failed because review was not found in the database");
             }
         }
@@ -201,6 +222,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
 
                 // When checking for permissions
@@ -217,8 +240,10 @@ namespace Vextech_API.Controllers
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "could not delete the review because we could not find it review");
             }
         }

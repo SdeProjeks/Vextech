@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.DataAccess;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -12,6 +13,8 @@ namespace Vextech_API.Controllers
         [HttpPost]
         public ActionResult CreateContact(string name, string email, string message)
         {
+            LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, email);
+
             try
             {
 
@@ -22,13 +25,14 @@ namespace Vextech_API.Controllers
                     Message = message
                 };
 
-                string sql = @"INSERT INTO contacts (Name, Email, Message) VALUES (@Name, @Email, @Message);";
+                string sql = @"INSERT INTO contacts (Name, Email, Message) VALUES (@Name, @Email, @);";
                 var result = SqlDataAccess.SaveData<ContactModel>(sql, data);
 
                 return this.StatusCode(StatusCodes.Status201Created, "Your message has been recieved.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, email, ex);
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Due to bad inputs the message was not created on our side. Change your inputs and try again.");
             }
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -15,6 +16,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = "SELECT * FROM roles;";
 
@@ -27,8 +30,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -38,6 +43,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT * FROM roles WHERE ID = {id};";
 
@@ -50,8 +57,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -61,6 +70,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 RoleModel data = new RoleModel()
                 {
                     Name = name
@@ -71,9 +82,11 @@ namespace Vextech_API.Controllers
                 var result = SqlDataAccess.SaveData<RoleModel>(sql,data);
                 return Ok("Role created succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                     return this.StatusCode(StatusCodes.Status400BadRequest, "Role was not created, because of invalid data");
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Role was not created, because of invalid data");
             }
         }
 
@@ -82,6 +95,8 @@ namespace Vextech_API.Controllers
         {
             try 
 	        {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 RoleModel data = new RoleModel()
                 {
                     ID = id,
@@ -94,8 +109,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Role updated succesfully");
 	        }
-	        catch (Exception)
+	        catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "Role Update failed, because the role was not found");
             }
         }
@@ -108,9 +125,11 @@ namespace Vextech_API.Controllers
         [HttpGet]
         public ActionResult<List<RoleHasPermissionModel>> GetRoleHasPermissions()
         {
-            try 
-	        {	        
-	        	string sql;
+            try
+            {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
+                string sql;
                 sql = "SELECT role_has_permission.RoleID,roles.Name AS RoleName,role_has_permission.PermissionID,permissions.Name AS PermissionName FROM role_has_permission INNER JOIN roles ON role_has_permission.RoleID = roles.ID INNER JOIN permissions ON role_has_permission.PermissionID = permissions.ID;";
                 
                 var DatabaseResult = SqlDataAccess.LoadData<VRoleHasPermissionModel>(sql).ToArray<VRoleHasPermissionModel>();
@@ -139,8 +158,10 @@ namespace Vextech_API.Controllers
                 }
                 return result;
 	        }
-	        catch (Exception)
+	        catch (Exception ex)
 	        {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
 	        }
         }
@@ -150,6 +171,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT role_has_permission.RoleID,roles.Name AS RoleName,role_has_permission.PermissionID,permissions.Name AS PermissionName FROM role_has_permission INNER JOIN roles ON role_has_permission.RoleID = roles.ID INNER JOIN permissions ON role_has_permission.PermissionID = permissions.ID WHERE role_has_permission.RoleID = {id};";
 
@@ -178,8 +201,10 @@ namespace Vextech_API.Controllers
                 }
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -189,6 +214,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"DELETE FROM role_has_permission WHERE RoleID = {role_id}";
                 var deleteResult = SqlDataAccess.DeleteData(sql);
@@ -210,8 +237,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Role updated Succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "The roles permissions failed, because of invalid data");
             }
 

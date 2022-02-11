@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -17,6 +18,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 phoneNumbers = new();
                 string sql;
                 sql = $"SELECT user_phonenumbers.PhoneNumber, mobile_category.Name FROM user_phonenumbers INNER JOIN mobile_category ON user_phonenumbers.MobileCategoryID = mobile_category.ID WHERE user_phonenumbers.UserID = {id};";
@@ -42,17 +45,20 @@ namespace Vextech_API.Controllers
                 return phoneNumbers;
                 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
 
         [HttpPost]
-        public ActionResult<List<VUserMobileModel>> CreatePhonenumber(ulong userID, ulong mobilCategoryID, string phoneNumber)
+        public ActionResult CreatePhonenumber(ulong userID, ulong mobilCategoryID, string phoneNumber)
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VUserMobileModel data = new VUserMobileModel()
                 {
                     UserID = userID,
@@ -66,8 +72,9 @@ namespace Vextech_API.Controllers
                 var result = SqlDataAccess.SaveData(sql, data);
                 return Ok("Added your Phone Number succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Phone number was not created because of invalid data");
             }
         }

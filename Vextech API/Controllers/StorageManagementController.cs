@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -17,6 +18,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 ProductQuantity = new();
                 string sql = $"SELECT products.Name, storage_products.Quantity FROM storage_products INNER JOIN products ON storage_products.ProductID = products.ID WHERE storage_products.StorageID = {id};";
                 var result = SqlDataAccess.LoadData<VStorageProductModel>(sql);
@@ -42,8 +45,10 @@ namespace Vextech_API.Controllers
 
                 return ProductQuantity;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
@@ -53,6 +58,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VStorageProductModel data = new()
                 {
                     StorageID = storageID,
@@ -65,8 +72,10 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status201Created,"Product was successfully added to the storage");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change your input and try again.");
             }
         }
@@ -76,6 +85,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VStorageProductModel data = new()
                 {
                     StorageID = storageID,
@@ -88,8 +99,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Product quantity updated for the storage successfully.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product to update in the database nothing was updated.");
             }
         }
@@ -100,13 +113,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = $"DELETE FROM storage_products WHERE StorageID={storageID} AND ProductID={productID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
                 return Ok("Product has been removed from the storage.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the product to delete in the database nothing was deleted.");
             }
         }

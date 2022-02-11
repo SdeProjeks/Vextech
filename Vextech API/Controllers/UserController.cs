@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -18,6 +19,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 Users = new();
                 string sql = "SELECT users.ID, users.Email, users.Firstname, users.Lastname, users.Password, users.VatID,"+
                     " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country"+
@@ -84,8 +87,10 @@ namespace Vextech_API.Controllers
                 }
                 return Users;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
 
@@ -96,6 +101,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 Users = new();
                 string sql = "SELECT users.ID, users.Email, users.Firstname, users.Lastname, users.Password, users.VatID," +
                     " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country" +
@@ -163,8 +170,10 @@ namespace Vextech_API.Controllers
                 }
                 return Users;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -174,6 +183,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VUserModel data = new()
                 {
                     AddressID = addressID,
@@ -190,8 +201,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Created user succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "created user Failed, because of invalid data");
             }
         }
@@ -201,6 +214,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 // Updates the user
                 string sql = $"UPDATE users SET RoleID={roleid}, AddressID={addressID}, Email='{email}', Firstname='{firstname}', Lastname='{lastname}', Password='{password}', VatID='{vatID}' WHERE ID={ID};";
                 var result = SqlDataAccess.UpdateData(sql);
@@ -227,8 +242,10 @@ namespace Vextech_API.Controllers
                 }
                 return Ok("Updated the user succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "User not found or invalid data");
             }
 
