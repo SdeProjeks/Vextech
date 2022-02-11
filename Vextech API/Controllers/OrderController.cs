@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -18,6 +19,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 Orders = new();
                 OrderProducts = new();
                 string sql = $"SELECT orders.ID, orders.Address, orders.PostNumber, orders.Country, orders.Date, orders.OrderStatusID, order_status.Name, orders.UserID, users.Email, users.Firstname, users.Lastname FROM orders INNER JOIN order_status ON orders.OrderStatusID = order_status.ID INNER JOIN users ON orders.UserID = users.ID WHERE orders.ID={orderID} AND orders.UserID={userID};";
@@ -77,8 +80,10 @@ namespace Vextech_API.Controllers
 
                 return Orders;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
@@ -88,6 +93,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VOrderModel data = new()
                 {
                     UserID = userID,
@@ -107,8 +114,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Order has been created.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
             }
         }
@@ -118,13 +127,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = $"UPDATE orders SET OrderStatusID={orderstatusID} WHERE ID={orderID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 return Ok("Order status has been updated.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the order in the database.");
             }
         }
@@ -134,13 +147,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = $"DELETE FROM orders WHERE ID={orderID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
                 return Ok("Order was successfully deleted.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database.");
             }
         }
@@ -150,6 +167,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 OrderStatusModel data = new()
                 {
                     Name = ordercategoryName
@@ -160,8 +179,10 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status201Created,"Order status has been created.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input order category was not created try changing your input.");
             }
         }
@@ -172,6 +193,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 OrderStatusModel data = new()
                 {
                     ID = orderstatusID,
@@ -183,8 +206,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Order status has been updated.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find your order in the database nothing was updated.");
             }
         }

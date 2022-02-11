@@ -13,10 +13,9 @@ namespace Vextech_API.Controllers
         [HttpPost]
         public ActionResult CreateContact(string name, string email, string message)
         {
-            LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, email);
-
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, email);
 
                 ContactModel data = new()
                 {
@@ -42,6 +41,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 var sql = "SELECT * FROM contacts";
                 var result = SqlDataAccess.LoadData<ContactModel>(sql);
 
@@ -52,8 +53,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
@@ -63,6 +66,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 var sql = $"SELECT * FROM contacts WHERE ID={id}";
                 var result = SqlDataAccess.LoadData<ContactModel>(sql);
 
@@ -73,8 +78,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
@@ -84,14 +91,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
                 string sql = $"DELETE FROM contacts WHERE ID={contactID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
                 return Ok("Contact was successfully deleted.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the support ticket in the database nothing got deleted.");
             }
         }
