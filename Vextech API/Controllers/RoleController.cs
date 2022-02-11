@@ -210,7 +210,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult CreateAndUpdateRolePermission (ulong role_id, List<ulong>? permissions)
+        public ActionResult CreateAndUpdateRolePermissions (ulong role_id, List<ulong>? permissions)
         {
             try
             {

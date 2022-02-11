@@ -49,6 +49,32 @@ namespace Vextech_API.Controllers
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
+        [HttpPost]
+        public ActionResult CreatePostNumbers(List<VPostNumberModel> postNumbers)
+        {
+            try
+            {
+                string sql;
+                foreach (var postnumber in postNumbers)
+                {
+                    VPostNumberModel data = new()
+                    {
+                        CountryID = postnumber.CountryID,
+                        City = postnumber.City,
+                        PostNumber = postnumber.PostNumber
+                    };
+                    sql = @"INSERT INTO post_numbers (CountryID, PostNumber, City) VALUES (@CountryID, @PostNumber, @City)";
+                    var result = SqlDataAccess.SaveData<VPostNumberModel>(sql, data);
+
+                }
+                return Ok("succesfully created all the Post Numbers");
+
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
                        
     }
 }
