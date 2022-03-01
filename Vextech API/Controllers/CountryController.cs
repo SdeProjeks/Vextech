@@ -62,16 +62,16 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult Createcountries(List<string> countryNames)
+        public ActionResult Createcountries(List<string> countries)
         {
             try
             {
                 string sql;
-                foreach (var countryname in countryNames)
+                foreach (var country in countries)
                 {
                     CountrieModel data = new CountrieModel()
                     {
-                        Country = countryname,
+                        Country = country,
                     };
                     sql = @"INSERT INTO countries (Country) VALUES (@Country)";
                     var result = SqlDataAccess.SaveData<CountrieModel>(sql, data);
