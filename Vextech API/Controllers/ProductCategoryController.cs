@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -16,6 +17,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 ProductCategoryNameModel data = new ProductCategoryNameModel
                 {
                     Category = category,
@@ -29,8 +32,10 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status201Created,"Product category has been created.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
             }
         }
@@ -40,6 +45,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = "SELECT * FROM product_category_names WHERE product_category_names.Subcategory IS NULL;";
                 var result = SqlDataAccess.LoadData<ProductCategoryNameModel>(sql);
 
@@ -50,8 +57,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError,"Database Failure");
             }
         }
@@ -61,6 +70,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = "SELECT * FROM product_category_names WHERE product_category_names.Subcategory IS NOT NULL;";
                 var result = SqlDataAccess.LoadData<ProductCategoryNameModel>(sql);
 
@@ -71,8 +82,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
             }
         }
@@ -82,13 +95,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql = $"UPDATE product_category_names SET Subcategory={subcategoryID}, category={categoryname} WHERE ID={1};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 return Ok("Category was updated.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "We could not find the category in the database nothing was updated.");
             }
         }

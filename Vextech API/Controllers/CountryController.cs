@@ -4,6 +4,7 @@ using Vextech_API.DataAccess;
 using Dapper;
 using MySqlConnector;
 using Dapper.Mapper;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -16,6 +17,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT ID, Country FROM countries;";
 
@@ -30,8 +33,10 @@ namespace Vextech_API.Controllers
                     return country;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -41,6 +46,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT ID, Country FROM countries WHERE ID = {id};";
 
@@ -55,8 +62,10 @@ namespace Vextech_API.Controllers
                     return country;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -66,6 +75,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 foreach (var country in countries)
                 {
@@ -80,8 +91,10 @@ namespace Vextech_API.Controllers
                 return Ok("succesfully created all the countries");
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }

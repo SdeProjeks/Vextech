@@ -5,6 +5,7 @@ using System.Data;
 using Vextech_API.DataAccess;
 using Vextech_API.Models.ViewModels;
 using Dapper.Mapper;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -18,6 +19,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 
                 sql = $"SELECT post_numbers.ID,  post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.ID, countries.Country " +
@@ -44,8 +47,10 @@ namespace Vextech_API.Controllers
                     return postNumbers;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -54,6 +59,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 foreach (var postnumber in postNumbers)
                 {
@@ -70,8 +77,10 @@ namespace Vextech_API.Controllers
                 return Ok("succesfully created all the Post Numbers");
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
