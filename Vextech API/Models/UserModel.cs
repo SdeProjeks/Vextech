@@ -11,6 +11,7 @@
         public string Password { get; set; }
         public string VatID { get; set; }
         public List<UserMobileModel> PhoneNumbers { get; set; }
+        public string Session { get; set; }
 
     }
 }

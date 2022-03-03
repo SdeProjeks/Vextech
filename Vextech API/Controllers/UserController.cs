@@ -4,6 +4,7 @@ using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
 using System.Reflection;
+using Vextech_API.Controllers;
 
 namespace Vextech_API.Controllers
 {
@@ -183,16 +184,17 @@ namespace Vextech_API.Controllers
         {
             try
             {
-                Users = new ();
+                Users = new();
                 if (session == "null")
                 {
                     string sql;
-                    sql = $"SELECT Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
+                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
                     var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
                     foreach (var user in databaseResult)
                     {
                         UserModel users = new()
                         {
+                            ID = user.ID,
                             Firstname = user.Firstname,
                             Lastname = user.Lastname
                         };
@@ -202,10 +204,33 @@ namespace Vextech_API.Controllers
                     {
                         return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
                     }
+
+                    Users[0].Session = UserSessionController.UserSessionHandler(Users[0].ID);
+
                     return Users[0];
                 }
                 else
                 {
+                    string sql;
+                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
+                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+                    foreach (var User in databaseResult)
+                    {
+                        UserModel users = new()
+                        {
+                            ID = User.ID,
+                            Firstname = User.Firstname,
+                            Lastname = User.Lastname
+                        };
+                        Users.Add(users);
+                    }
+                    if (Users.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
+                    }
+
+                    Users[0].Session = UserSessionController.UserSessionHandler(Users[0].ID, session);
+
                     return Users[0];
                 }
             }
@@ -213,7 +238,7 @@ namespace Vextech_API.Controllers
             {
                 LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
 
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
 
