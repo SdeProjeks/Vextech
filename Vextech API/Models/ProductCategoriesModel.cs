@@ -1,11 +1,13 @@
-﻿using Vextech_API.DataAccess;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Vextech_API.DataAccess;
 using Vextech_API.Models.ViewModels;
 
 namespace Vextech_API.Models
 {
-    public class ProductCategoriesModel : IProductCategoriesModel
+    [Table("product_categoties")]
+    public class ProductCategoriesModel
     {
-        public ProductModel ProductID { get; set; }
-        public ProductCategoryNameModel CategoryID { get; set; }
+        public int ProductID { get; }
+        public int CategoryID { get; }
     }
 }

@@ -1,14 +1,17 @@
-﻿namespace Vextech_API.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Vextech_API.Models
 {
-    public class ProductModel : IProductModel
+    [Table("product")]
+    public class ProductModel
     {
         public int ID { get; set; }
         public ProductBrandModel Brand { get; set; }
         public string Name { get; set; }
-        public string Descrption { get; set; }
+        public string Description { get; set; }
         public int Active { get; set; } = 0;
         public decimal Price { get; set; }
         public DateTime? Release_date { get; set; }
-        public List<ProductCategoryNameModel> Categories { get; set; }
+        public List<ProductCategoryNameModel> Categories { get; set; } = new List<ProductCategoryNameModel>();
     }
 }
