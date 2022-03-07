@@ -80,7 +80,7 @@ namespace Vextech_API.Controllers
                         {
                             Name = Review.Name,
                             Price = Review.Price,
-                            Descrption = Review.Decription,
+                            Description = Review.Decription,
                             Brand = new()
                             {
                                 ID = Review.BrandID,
@@ -133,7 +133,7 @@ namespace Vextech_API.Controllers
                             ID = Review.ProductID,
                             Name = Review.Name,
                             Price = Review.Price,
-                            Descrption = Review.Decription,
+                            Description = Review.Decription,
                             Brand = new()
                             {
                                 ID = Review.BrandID,
