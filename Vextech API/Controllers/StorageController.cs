@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
+using System.Reflection;
 
 namespace Vextech_API.Controllers
 {
@@ -15,6 +16,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT * FROM storage_category;";
                 var result = SqlDataAccess.LoadData<StorageCategoryModel>(sql);
@@ -26,17 +29,21 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<List<StorageCategoryModel>> GetStorageCategories(int id)
+        public ActionResult<List<StorageCategoryModel>> GetStorageCategory(int id)
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT * FROM storage_category WHERE ID = {id};";
                 var result = SqlDataAccess.LoadData<StorageCategoryModel>(sql);
@@ -48,8 +55,10 @@ namespace Vextech_API.Controllers
 
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -59,6 +68,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 StorageCategoryModel data = new StorageCategoryModel()
                 {
                     Category = category
@@ -76,8 +87,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Succes");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs please change your inputs and try again.");
             }
         }
@@ -87,14 +100,18 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"UPDATE storage_category SET Category = \"{category}\" WHERE ID = {id};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 return Ok("Succes");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "The storage category selected was not found in the database nothing got updated");
             }
         }
@@ -106,6 +123,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT storage.ID, storage.StorageCatID, storage_category.Category, storage.AddressID, addresses.Address, addresses.PostNumberID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.Country FROM storage INNER JOIN storage_category ON storage.ID = storage_category.ID INNER JOIN addresses ON storage.AddressID = addresses.ID INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID;";
                 var result = SqlDataAccess.LoadData<VStorageModel>(sql);
@@ -147,18 +166,22 @@ namespace Vextech_API.Controllers
 
                 return Remapping;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
 
 
         [HttpGet("{id:int}")]
-        public ActionResult<List<StorageModel>> GetStorages(int id)
+        public ActionResult<List<StorageModel>> GetStorage(int id)
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
                 sql = $"SELECT storage.ID, storage.StorageCatID, storage_category.Category, storage.AddressID, addresses.Address, addresses.PostNumberID, post_numbers.PostNumber, post_numbers.City, post_numbers.CountryID, countries.Country FROM storage INNER JOIN storage_category ON storage.ID = storage_category.ID INNER JOIN addresses ON storage.AddressID = addresses.ID INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID WHERE storage.ID = {id};";
                 var result = SqlDataAccess.LoadData<VStorageModel>(sql);
@@ -200,8 +223,10 @@ namespace Vextech_API.Controllers
 
                 return Remapping;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
@@ -211,6 +236,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VStorageModel data = new VStorageModel()
                 {
                     StorageCatID = categoryID,
@@ -223,8 +250,10 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status201Created,"Succes");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid input please change the input and try again.");
             }
         }
@@ -234,6 +263,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 string sql;
 
                 sql = $"UPDATE storage SET StorageCatID={categoryID}, AddressID={addressID} WHERE ID = {id};";
@@ -241,8 +272,10 @@ namespace Vextech_API.Controllers
 
                 return Ok("Succes");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status404NotFound, "Storage not found in the database nothing was updated.");
             }
         }

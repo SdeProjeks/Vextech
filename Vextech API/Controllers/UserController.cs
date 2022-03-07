@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
+using System.Reflection;
+using Vextech_API.Controllers;
 
 namespace Vextech_API.Controllers
 {
@@ -18,6 +20,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 Users = new();
                 string sql = "SELECT users.ID, users.Email, users.Firstname, users.Lastname, users.Password, users.VatID,"+
                     " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country"+
@@ -47,7 +51,7 @@ namespace Vextech_API.Controllers
 
                     UserModel users = new()
                     {
-                        Id = user.ID,
+                        ID = user.ID,
                         Role = new()
                         {
                             ID = user.RoleID,
@@ -78,10 +82,16 @@ namespace Vextech_API.Controllers
                     };
                     Users.Add(users);
                 }
+                if (Users.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status204NoContent, "There is no users");
+                }
                 return Users;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
 
@@ -92,6 +102,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 Users = new();
                 string sql = "SELECT users.ID, users.Email, users.Firstname, users.Lastname, users.Password, users.VatID," +
                     " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country" +
@@ -121,7 +133,7 @@ namespace Vextech_API.Controllers
 
                     UserModel users = new()
                     {
-                        Id = user.ID,
+                        ID = user.ID,
                         Role = new()
                         {
                             ID = user.RoleID,
@@ -152,22 +164,93 @@ namespace Vextech_API.Controllers
                     };
                     Users.Add(users);
                 }
+
+                if (Users.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "user not found");
+                }
                 return Users;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult<UserModel> Userlogin(string email, string password, string session = "null")
+        {
+            try
+            {
+                Users = new();
+                if (session == "null")
+                {
+                    string sql;
+                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
+                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+                    foreach (var user in databaseResult)
+                    {
+                        UserModel users = new()
+                        {
+                            ID = user.ID,
+                            Firstname = user.Firstname,
+                            Lastname = user.Lastname
+                        };
+                        Users.Add(users);
+                    }
+                    if (Users.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
+                    }
+
+                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
+
+                    return Users[0];
+                }
+                else
+                {
+                    string sql;
+                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
+                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+                    foreach (var User in databaseResult)
+                    {
+                        UserModel users = new()
+                        {
+                            ID = User.ID,
+                            Firstname = User.Firstname,
+                            Lastname = User.Lastname
+                        };
+                        Users.Add(users);
+                    }
+                    if (Users.Count == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
+                    }
+
+                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID, session);
+
+                    return Users[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
 
         [HttpPost]
-        public ActionResult CreateUser(ulong roleID, int addressID, string email, string firstname, string lastname, string password, string? vatID)
+        public ActionResult CreateUser(int addressID, string email, string firstname, string lastname, string password, string? vatID)
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 VUserModel data = new()
                 {
-                    RoleID = roleID,
                     AddressID = addressID,
                     Email = email,
                     Firstname = firstname,
@@ -176,14 +259,17 @@ namespace Vextech_API.Controllers
                     VatID = vatID
                 };
                 string sql;
-                sql = @"INSERT INTO users (RoleID,AddressID,Email,Firstname,Lastname,Password,VatID) VALUES (@RoleID,@AddressID,@Email,@Firstname,@Lastname,@Password,@VatID);";
+                sql = @"INSERT INTO users (AddressID,Email,Firstname,Lastname,Password,VatID) VALUES (@AddressID,@Email,@Firstname,@Lastname,@Password,@VatID);";
                 
                 var result = SqlDataAccess.SaveData<VUserModel>(sql, data);
+
                 return Ok("Created user succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status400BadRequest, "created user Failed, because of invalid data");
             }
         }
 
@@ -192,13 +278,15 @@ namespace Vextech_API.Controllers
         {
             try
             {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
                 // Updates the user
                 string sql = $"UPDATE users SET RoleID={roleid}, AddressID={addressID}, Email='{email}', Firstname='{firstname}', Lastname='{lastname}', Password='{password}', VatID='{vatID}' WHERE ID={ID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 if (result == 0)
                 {
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, "A database issue has been encountered the user was not updated.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "user was not updated either because of invalid data or not found");
                 }
 
                 // Deleting the users phone
@@ -218,9 +306,11 @@ namespace Vextech_API.Controllers
                 }
                 return Ok("Updated the user succesfully");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "User not found or invalid data");
             }
 
         }
