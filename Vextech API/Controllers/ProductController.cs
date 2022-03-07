@@ -50,7 +50,7 @@ namespace Vextech_API.Controllers
                         {
 
                             ProductModel productEntiry;
-                            //Create A product
+                            // prevents dublicate products ids
                             if (!productmap.TryGetValue(product.ID, out productEntiry))
                             {
                                 productmap.Add(product.ID, productEntiry = product);
