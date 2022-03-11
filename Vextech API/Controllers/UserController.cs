@@ -207,7 +207,7 @@ namespace Vextech_API.Controllers
                         return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
                     }
 
-                    Users[0].Session = UserSessionController.UserSessionHandler(Users[0].ID);
+                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
 
                     return Users[0];
                 }
@@ -231,7 +231,7 @@ namespace Vextech_API.Controllers
                         return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
                     }
 
-                    Users[0].Session = UserSessionController.UserSessionHandler(Users[0].ID, session);
+                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID, session);
 
                     return Users[0];
                 }

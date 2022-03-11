@@ -4,6 +4,10 @@ using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using Vextech_API.Controllers;
+using System.Data;
+using MySqlConnector;
+using Dapper.Mapper;
+using Dapper;
 
 namespace Vextech_API.Controllers
 {
@@ -14,56 +18,100 @@ namespace Vextech_API.Controllers
         public List<ProductModel> Products { get; set; }
         public List<ProductCategoryNameModel> categories { get; set; }
 
+        
         [HttpGet]
+        //gets alle active products
         public ActionResult<List<ProductModel>> GetProducts()
         {
             try
             {
-                Products = new();
-                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.Active = 1;";
-                var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                if (DatabaseResults.Count == 0)
+                //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE products.Active = 1 ORDER BY products.ID ASC; "
+                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
+                    "products.BrandID, product_brand.ID, product_brand.Brand, " +
+                    "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
+                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "FROM products " +
+                    "INNER JOIN product_brand " +
+                    "ON products.BrandID = product_brand.ID " +
+                    "INNER JOIN product_categories " +
+                    "ON products.ID = product_categories.ProductID " +
+                    "INNER JOIN product_category_names " +
+                    "ON product_categories.CategoryID = product_category_names.ID " +
+                    "WHERE products.Active = 1 " +
+                    "ORDER BY products.ID ASC";
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                    //a map over the products that has ben mapt  
+                    var productmap = new Dictionary<int, ProductModel>();
+                    //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                        sql,
+                        (product, productBrand, productCategoryName) =>
+                        {
+
+                            ProductModel productEntiry;
+                            // prevents dublicate products ids
+                            if (!productmap.TryGetValue(product.ID, out productEntiry))
+                            {
+                                productmap.Add(product.ID, productEntiry = product);
+                            }
+
+                            //adds a categorie to the product
+                            productEntiry.Categories.Add(productCategoryName);
+                            //sets the brand of the product
+                            productEntiry.Brand = productBrand;
+
+                            return productEntiry;
+                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        ).Distinct().ToList();
+                    return list;
                 }
 
-                foreach (var item in DatabaseResults)
-                {
-                    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
-                    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
-                    categories = new();
+                //Products = new();
+                //string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.Active = 1;";
+                //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
 
-                    foreach (var Databasecategory in CategoriesResult)
-                    {
-                        ProductCategoryNameModel category = new()
-                        {
-                            ID = Databasecategory.CategoryID,
-                            Subcategory = Databasecategory.Subcategory,
-                            Category = Databasecategory.Category
-                        };
-                        categories.Add(category);
-                    }
+                //if (DatabaseResults.Count == 0)
+                //{
+                //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                //}
 
-                    ProductModel products = new()
-                    {
-                        ID = item.ID, 
-                        Name = item.Name,
-                        Price = item.Price,
-                        Active = item.Active,
-                        Release_date = item.Release_date,
-                        Brand = new()
-                        {
-                            ID = item.BrandID,
-                            Brand = item.Brand
-                        },
-                        Categories = categories
-                    };
+                //foreach (var item in DatabaseResults)
+                //{
+                //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
+                //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
+                //    categories = new();
 
-                    Products.Add(products);
-                }
+                //    foreach (var Databasecategory in CategoriesResult)
+                //    {
+                //        ProductCategoryNameModel category = new()
+                //        {
+                //            ID = Databasecategory.CategoryID,
+                //            Subcategory = Databasecategory.Subcategory,
+                //            Category = Databasecategory.Category
+                //        };
+                //        categories.Add(category);
+                //    }
 
-                return Products;
+                //    ProductModel products = new()
+                //    {
+                //        ID = item.ID,
+                //        Name = item.Name,
+                //        Price = item.Price,
+                //        Active = item.Active,
+                //        Release_date = item.Release_date,
+                //        Brand = new()
+                //        {
+                //            ID = item.BrandID,
+                //            Brand = item.Brand
+                //        },
+                //        Categories = categories
+                //    };
+
+                //    Products.Add(products);
+                //}
+
+                //return Products;
             }
             catch (Exception)
             {
@@ -72,58 +120,103 @@ namespace Vextech_API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<ProductModel> GetProduct(int id)
+        //gets active product by id 
+        public ActionResult<List<ProductModel>> GetProduct(int id)
         {
             try
             {
-                string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id} AND products.Active = 1;";
-                var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                if (DatabaseResults.Count == 0)
+                //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE products.Active = 1 AND  products.ID = {id}; "
+                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
+                    "products.BrandID, product_brand.ID, product_brand.Brand, " +
+                    "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
+                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "FROM products " +
+                    "INNER JOIN product_brand " +
+                    "ON products.BrandID = product_brand.ID " +
+                    "INNER JOIN product_categories " +
+                    "ON products.ID = product_categories.ProductID " +
+                    "INNER JOIN product_category_names " +
+                    "ON product_categories.CategoryID = product_category_names.ID " +
+                    $"WHERE products.Active = 1 AND  products.ID = {id}";
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                    //a map over the products that has ben mapt  
+                    var productmap = new Dictionary<int, ProductModel>();
+                    //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                        sql,
+                        (product, productBrand, productCategoryName) =>
+                        {
+                            ProductModel productEntiry;
+                        //Create A product
+                        if (!productmap.TryGetValue(product.ID, out productEntiry))
+                            {
+                                productmap.Add(product.ID, productEntiry = product);
+                            }
+                        //sets the brand of the product
+                        productEntiry.Brand = productBrand;
+                        //adds a categorie to the product
+                        productEntiry.Categories.Add(productCategoryName);
+
+                            return productEntiry;
+                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        )
+                        .Distinct()
+                        .ToList();
+                    return list;
                 }
 
-                if (DatabaseResults.Count > 0)
-                {
-                    // Gets all the products categories:
-                    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {id};";
-                    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
 
-                    // Creates new list to handle all the products categories:
-                    categories = new();
-                    foreach (var Databasecategory in CategoriesResult)
-                    {
-                        ProductCategoryNameModel category = new()
-                        {
-                            ID = Databasecategory.CategoryID,
-                            Subcategory = Databasecategory.Subcategory,
-                            Category = Databasecategory.Category
-                        };
-                        categories.Add(category);
-                    }
 
-                    // Creates a single product from a model
-                    ProductModel products = new()
-                    {
-                        ID = DatabaseResults[0].ID,
-                        Name = DatabaseResults[0].Name,
-                        Descrption = DatabaseResults[0].Description,
-                        Price = DatabaseResults[0].Price,
-                        Active = DatabaseResults[0].Active,
-                        Release_date = DatabaseResults[0].Release_date,
-                        Brand = new()
-                        {
-                            ID = DatabaseResults[0].BrandID,
-                            Brand = DatabaseResults[0].Brand
-                        },
-                        Categories = categories
-                    };
 
-                    return products;
-                }
-                
-                return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
+                //        //string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id} AND products.Active = 1;";
+                //        //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
+
+                //        //if (DatabaseResults.Count == 0)
+                //        //{
+                //        //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                //        //}
+
+                //        //if (DatabaseResults.Count > 0)
+                //        //{
+                //        //    // Gets all the products categories:
+                //        //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {id};";
+                //        //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
+
+                //        //    // Creates new list to handle all the products categories:
+                //        //    categories = new();
+                //        //    foreach (var Databasecategory in CategoriesResult)
+                //        //    {
+                //        //        ProductCategoryNameModel category = new()
+                //        //        {
+                //        //            ID = Databasecategory.CategoryID,
+                //        //            Subcategory = Databasecategory.Subcategory,
+                //        //            Category = Databasecategory.Category
+                //        //        };
+                //        //        categories.Add(category);
+                //        //    }
+
+                //        //    // Creates a single product from a model
+                //        //    ProductModel products = new()
+                //        //    {
+                //        //        ID = DatabaseResults[0].ID,
+                //        //        Name = DatabaseResults[0].Name,
+                //        //        Description = DatabaseResults[0].Description,
+                //        //        Price = DatabaseResults[0].Price,
+                //        //        Active = DatabaseResults[0].Active,
+                //        //        Release_date = DatabaseResults[0].Release_date,
+                //        //        Brand = new()
+                //        //        {
+                //        //            ID = DatabaseResults[0].BrandID,
+                //        //            Brand = DatabaseResults[0].Brand
+                //        //        },
+                //        //        Categories = categories
+                //        //    };
+
+                //        //    return products;
+                //        //}
+
+                //        //return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
             }
             catch (Exception)
             {
@@ -132,115 +225,200 @@ namespace Vextech_API.Controllers
         }
 
         [HttpGet]
+        //Gets alle products
         public ActionResult<List<ProductModel>> AdminGetAllProducts()
         {
             try
             {
-                Products = new();
-                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID;";
-                var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                if (DatabaseResults.Count == 0)
+                //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID; "
+                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
+                    "products.BrandID, product_brand.ID, product_brand.Brand, " +
+                    "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
+                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "FROM products " +
+                    "INNER JOIN product_brand " +
+                    "ON products.BrandID = product_brand.ID " +
+                    "INNER JOIN product_categories " +
+                    "ON products.ID = product_categories.ProductID " +
+                    "INNER JOIN product_category_names " +
+                    "ON product_categories.CategoryID = product_category_names.ID " +
+                    "ORDER BY products.ID ASC";
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                    //a map over the products that has ben mapt  
+                    var productmap = new Dictionary<int, ProductModel>();
+                    //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                        sql,
+                        (product, productBrand, productCategoryName) =>
+                        {
+                            ProductModel productEntiry;
+                        //Create A product
+                        if (!productmap.TryGetValue(product.ID, out productEntiry))
+                            {
+                                productmap.Add(product.ID, productEntiry = product);
+                            }
+                        //sets the brand of the product
+                        productEntiry.Brand = productBrand;
+                        //adds a categorie to the product
+                        productEntiry.Categories.Add(productCategoryName);
+
+                            return productEntiry;
+                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        )
+                        .Distinct()
+                        .ToList();
+                    return list;
                 }
 
-                foreach (var item in DatabaseResults)
-                {
-                    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
-                    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
-                    categories = new();
+                //        //Products = new();
+                //        //string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID;";
+                //        //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
 
-                    foreach (var Databasecategory in CategoriesResult)
-                    {
-                        ProductCategoryNameModel category = new()
-                        {
-                            ID = Databasecategory.CategoryID,
-                            Subcategory = Databasecategory.Subcategory,
-                            Category = Databasecategory.Category
-                        };
-                        categories.Add(category);
-                    }
+                //        //if (DatabaseResults.Count == 0)
+                //        //{
+                //        //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
+                //        //}
 
-                    ProductModel products = new()
-                    {
-                        ID = item.ID,
-                        Name = item.Name,
-                        Price = item.Price,
-                        Active = item.Active,
-                        Release_date = item.Release_date,
-                        Brand = new()
-                        {
-                            ID = item.BrandID,
-                            Brand = item.Brand
-                        },
-                        Categories = categories
-                    };
+                //        //foreach (var item in DatabaseResults)
+                //        //{
+                //        //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
+                //        //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
+                //        //    categories = new();
 
-                    Products.Add(products);
-                }
+                //        //    foreach (var Databasecategory in CategoriesResult)
+                //        //    {
+                //        //        ProductCategoryNameModel category = new()
+                //        //        {
+                //        //            ID = Databasecategory.CategoryID,
+                //        //            Subcategory = Databasecategory.Subcategory,
+                //        //            Category = Databasecategory.Category
+                //        //        };
+                //        //        categories.Add(category);
+                //        //    }
 
-                return Products;
+                //        //    ProductModel products = new()
+                //        //    {
+                //        //        ID = item.ID,
+                //        //        Name = item.Name,
+                //        //        Price = item.Price,
+                //        //        Active = item.Active,
+                //        //        Release_date = item.Release_date,
+                //        //        Brand = new()
+                //        //        {
+                //        //            ID = item.BrandID,
+                //        //            Brand = item.Brand
+                //        //        },
+                //        //        Categories = categories
+                //        //    };
+
+                //        //    Products.Add(products);
+                //        //}
+
+                //        //return Products;
+
             }
             catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
+
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<ProductModel> AdminGetProduct(int id)
+        public ActionResult<List<ProductModel>> AdminGetProduct(int id)
         {
             try
             {
-                string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id};";
-                var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                if (DatabaseResults.Count == 0)
+                //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID; "
+                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
+                    "products.BrandID, product_brand.ID, product_brand.Brand, " +
+                    "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
+                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "FROM products " +
+                    "INNER JOIN product_brand " +
+                    "ON products.BrandID = product_brand.ID " +
+                    "INNER JOIN product_categories " +
+                    "ON products.ID = product_categories.ProductID " +
+                    "INNER JOIN product_category_names " +
+                    "ON product_categories.CategoryID = product_category_names.ID" +
+                    $"WHERE products.ID = {id}";
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                    //a map over the products that has ben mapt  
+                    var productmap = new Dictionary<int, ProductModel>();
+                    //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                        sql,
+                        (product, productBrand, productCategoryName) =>
+                        {
+                            ProductModel productEntiry;
+                        //Create A product
+                        if (!productmap.TryGetValue(product.ID, out productEntiry))
+                            {
+                                productmap.Add(product.ID, productEntiry = product);
+                            }
+                        //sets the brand of the product
+                        productEntiry.Brand = productBrand;
+                        //adds a categorie to the product
+                        productEntiry.Categories.Add(productCategoryName);
+
+                            return productEntiry;
+                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        )
+                        .Distinct()
+                        .ToList();
+                    return list;
                 }
 
-                if (DatabaseResults.Count > 0)
-                {
-                    // Gets all the products categories:
-                    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {id};";
-                    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
+                //string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id};";
+                //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
 
-                    // Creates new list to handle all the products categories:
-                    categories = new();
-                    foreach (var Databasecategory in CategoriesResult)
-                    {
-                        ProductCategoryNameModel category = new()
-                        {
-                            ID = Databasecategory.CategoryID,
-                            Subcategory = Databasecategory.Subcategory,
-                            Category = Databasecategory.Category
-                        };
-                        categories.Add(category);
-                    }
+                //if (DatabaseResults.Count == 0)
+                //{
+                //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
+                //}
 
-                    // Creates a single product from a model
-                    ProductModel products = new()
-                    {
-                        ID = DatabaseResults[0].ID,
-                        Name = DatabaseResults[0].Name,
-                        Descrption = DatabaseResults[0].Description,
-                        Price = DatabaseResults[0].Price,
-                        Active = DatabaseResults[0].Active,
-                        Release_date = DatabaseResults[0].Release_date,
-                        Brand = new()
-                        {
-                            ID = DatabaseResults[0].BrandID,
-                            Brand = DatabaseResults[0].Brand
-                        },
-                        Categories = categories
-                    };
+                //if (DatabaseResults.Count > 0)
+                //{
+                //    // Gets all the products categories:
+                //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {id};";
+                //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
 
-                    return products;
-                }
+                //    // Creates new list to handle all the products categories:
+                //    categories = new();
+                //    foreach (var Databasecategory in CategoriesResult)
+                //    {
+                //        ProductCategoryNameModel category = new()
+                //        {
+                //            ID = Databasecategory.CategoryID,
+                //            Subcategory = Databasecategory.Subcategory,
+                //            Category = Databasecategory.Category
+                //        };
+                //        categories.Add(category);
+                //    }
 
-                return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
+                //    // Creates a single product from a model
+                //    ProductModel products = new()
+                //    {
+                //        ID = DatabaseResults[0].ID,
+                //        Name = DatabaseResults[0].Name,
+                //        Description = DatabaseResults[0].Description,
+                //        Price = DatabaseResults[0].Price,
+                //        Active = DatabaseResults[0].Active,
+                //        Release_date = DatabaseResults[0].Release_date,
+                //        Brand = new()
+                //        {
+                //            ID = DatabaseResults[0].BrandID,
+                //            Brand = DatabaseResults[0].Brand
+                //        },
+                //        Categories = categories
+                //    };
+
+                //    return products;
+                //}
+
+                //return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
             }
             catch (Exception)
             {
@@ -253,6 +431,8 @@ namespace Vextech_API.Controllers
         {
             try
             {
+
+
                 VProductModel data = new()
                 {
                     Name = name,
@@ -276,7 +456,7 @@ namespace Vextech_API.Controllers
                     results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
                 }
 
-                return this.StatusCode(StatusCodes.Status201Created,"Product was created successfully");
+                return this.StatusCode(StatusCodes.Status201Created, "Product was created successfully");
             }
             catch (Exception)
             {
@@ -301,7 +481,7 @@ namespace Vextech_API.Controllers
 
                 // Update product
                 string sql = @"UPDATE products SET Name=@Name, Description=@Description, BrandID=@BrandID, Price=@Price, Release_date=@Release_date, Active=@Active WHERE ID = @ID;";
-                var results = SqlDataAccess.SaveData<VProductModel>(sql,data);
+                var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
 
                 // Delete all connected categories to then reapply them later
                 sql = $"DELETE FROM product_categories WHERE ProductID = {id}";

@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Vextech_API.Models;
 using Vextech_API.DataAccess;
 using System.Reflection;
+using System.Net.Http;
 
 namespace Vextech_API.Controllers
 {
     public class UserSessionController : ControllerBase
     {
-        public static string UserSessionHandler(ulong userid, string oldsession = "null")
+        public static string UserLoginSessionHandler(ulong userid, string oldsession = "null")
         {
             try
             {
@@ -18,7 +19,7 @@ namespace Vextech_API.Controllers
                 if (oldsession != "null")
                 {
                     // Checks if the session exists
-                    var oldsessionresult = SessionExist(userid, oldsession);
+                    var oldsessionresult = SessionExist(oldsession);
                     DateTime now = DateTime.UtcNow;
 
                     // Checks if the expire date is lower than current datetime if so just update the expiretime with same sesion.
@@ -51,15 +52,56 @@ namespace Vextech_API.Controllers
             }
         }
 
-        public static UserSessionModel SessionExist(ulong userid, string session)
+        public static string UserAPISessionHandler(string oldsession)
         {
-            string sql = $"SELECT * FROM user_sessions WHERE ID='{session}' AND UserID={userid};";
+            // Checks if the session exists
+            var oldsessionresult = SessionExist(oldsession);
+            DateTime now = DateTime.UtcNow;
+
+            // Checks if the expire date is lower than current datetime if so just update the expiretime with same sesion.
+            if (oldsessionresult.Expires >= now)
+            {
+                updateSession(oldsession);
+
+                return "Session has been updated.";
+            }
+            else // If the session date has expired logout user
+            {
+                deleteOldSession(oldsession);
+
+                return "Session has expired.";
+            }
+        }
+
+        public static string SessionPermissionGrant(string permission, string oldsession)
+        {
+            string sql = $"SELECT permissions.Name FROM user_sessions INNER JOIN users ON user_sessions.UserID = users.ID INNER JOIN roles ON users.RoleID = roles.ID INNER JOIN role_has_permission ON role_has_permission.RoleID = roles.ID INNER JOIN permissions ON role_has_permission.PermissionID = permissions.ID WHERE user_sessions.ID='{oldsession}' AND permissions.Name='{permission}';";
+
+            var result = SqlDataAccess.LoadData<PermissionModel>(sql);
+
+            if (result.Count == 0)
+            {
+                return "Denied";
+            }
+            else if (result.Count == 1 && result[0].Name == permission)
+            {
+                return "Granted";
+            }
+            else
+            {
+                throw new Exception("Bad request more than one result was gotten sql injection?");
+            }
+        }
+
+        public static UserSessionModel SessionExist(string session)
+        {
+            string sql = $"SELECT * FROM user_sessions WHERE ID='{session}';";
 
             var result = SqlDataAccess.LoadData<UserSessionModel>(sql);
 
             if (result.Count == 0)
             {
-                throw new Exception("Session or user was not found.");
+                throw new Exception("Session was not found.");
             }
 
             return result[0];
