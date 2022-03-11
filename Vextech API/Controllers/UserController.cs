@@ -5,6 +5,8 @@ using Vextech_API.Models.ViewModels;
 using Vextech_API.DataAccess;
 using System.Reflection;
 using Vextech_API.Controllers;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace Vextech_API.Controllers
 {
@@ -243,27 +245,32 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateUser(int addressID, string email, string firstname, string lastname, string password, string? vatID)
+        public ActionResult CreateUser(VUserModel userCreate)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
-
-                VUserModel data = new()
-                {
-                    AddressID = addressID,
-                    Email = email,
-                    Firstname = firstname,
-                    Lastname = lastname,
-                    Password = password,
-                    VatID = vatID
-                };
-                string sql;
-                sql = @"INSERT INTO users (AddressID,Email,Firstname,Lastname,Password,VatID) VALUES (@AddressID,@Email,@Firstname,@Lastname,@Password,@VatID);";
+                //VUserModel data = new()
+                //{
+                //    AddressID = userCreate.AddressID,
+                //    RoleID = userCreate.RoleID,
+                //    Email = email,
+                //    Firstname = firstname,
+                //    Lastname = lastname,
+                //    Password = password,
+                //    VatID = vatID
+                //    };
                 
-                var result = SqlDataAccess.SaveData<VUserModel>(sql, data);
+                string sql;
+                sql = @"INSERT INTO users (AddressID,RoleID,Email,Firstname,Lastname,Password,VatID) VALUES (@AddressID,@RoleID,@Email,@Firstname,@Lastname,@Password,@VatID);";
+                
+                var result = SqlDataAccess.SaveData<VUserModel>(sql, userCreate);
 
                 return Ok("Created user succesfully");
+            }
+            catch (ValidationException ve)
+            {
+                return this.StatusCode(StatusCodes.Status406NotAcceptable, ve.Message);
             }
             catch (Exception ex)
             {
@@ -274,14 +281,14 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateUser(ulong ID, ulong roleid, ulong addressID, string email, string firstname, string lastname, string password, string? vatID, List<VUserMobileModel> phoneNumbers)
+        public ActionResult UpdateUser(UserModel updateUser)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
                 // Updates the user
-                string sql = $"UPDATE users SET RoleID={roleid}, AddressID={addressID}, Email='{email}', Firstname='{firstname}', Lastname='{lastname}', Password='{password}', VatID='{vatID}' WHERE ID={ID};";
+                string sql = $"UPDATE users SET RoleID={updateUser.Role.ID}, AddressID={updateUser.Address.ID}, Email='{updateUser.Email}', Firstname='{updateUser.Firstname}', Lastname='{updateUser.Lastname}', Password='{updateUser.Password}', VatID='{updateUser.VatID}' WHERE ID={updateUser.ID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 if (result == 0)
@@ -290,20 +297,20 @@ namespace Vextech_API.Controllers
                 }
 
                 // Deleting the users phone
-                sql = $"DELETE FROM user_phonenumbers WHERE UserID = {ID}";
-                result = SqlDataAccess.DeleteData(sql);
+                //sql = $"DELETE FROM user_phonenumbers WHERE UserID = {updateUser.ID}";
+                //result = SqlDataAccess.DeleteData(sql);
 
-                foreach (var phoneNumber in phoneNumbers)
-                {
-                    VUserMobileModel PhoneModel = new()
-                    {
-                        UserID = ID,
-                        MobileCategoryID = phoneNumber.MobileCategoryID,
-                        PhoneNumber = phoneNumber.PhoneNumber
-                    };
-                    sql = @"INSERT INTO user_phonenumbers (UserID,MobileCategoryID,PhoneNumber) VALUES (@UserID, @MobilCategoryID, @PhoneNumber)";
-                    result = SqlDataAccess.SaveData<VUserMobileModel>(sql, PhoneModel);
-                }
+                //foreach (var phoneNumber in updateUser.PhoneNumbers)
+                //{
+                //    VUserMobileModel PhoneModel = new()
+                //    {
+                //        UserID = updateUser.ID,
+                //        MobileCategoryID = phoneNumber.mobileCategory.ID,
+                //        PhoneNumber = phoneNumber.PhoneNumber
+                //    };
+                //    sql = @"INSERT INTO user_phonenumbers (UserID,MobileCategoryID,PhoneNumber) VALUES (@UserID, @MobilCategoryID, @PhoneNumber)";
+                //    result = SqlDataAccess.SaveData<VUserMobileModel>(sql, PhoneModel);
+                //}
                 return Ok("Updated the user succesfully");
             }
             catch (Exception ex)

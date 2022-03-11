@@ -9,10 +9,10 @@ namespace Vextech.Tests
         {
             // Arrange
             var expected = "Tim Sommerstedt";
-            var firstname = "Tim";
-            var secondname = "Sommerstedt";
 
             // Act
+            var firstname = "Tim";
+            var secondname = "Sommerstedt";
             var actual = firstname + " " + secondname;
 
             // Assert

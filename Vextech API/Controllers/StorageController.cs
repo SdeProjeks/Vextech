@@ -64,20 +64,20 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateStorageCategory(string category)
+        public ActionResult CreateStorageCategory(StorageCategoryModel createStorageCategory)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                StorageCategoryModel data = new StorageCategoryModel()
-                {
-                    Category = category
-                };
+                //StorageCategoryModel data = new StorageCategoryModel()
+                //{
+                //    Category = category
+                //};
 
                 string sql;
                 sql = @"INSERT INTO storage_category (Category) VALUES (@Category);";
-                var result = SqlDataAccess.SaveData<StorageCategoryModel>(sql, data);
+                var result = SqlDataAccess.SaveData<StorageCategoryModel>(sql, createStorageCategory);
 
                 if (result == 0)
                 {
@@ -96,14 +96,14 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateStorageCategory(int id, string category)
+        public ActionResult UpdateStorageCategory(StorageCategoryModel updateStorageCatModel)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
                 string sql;
-                sql = $"UPDATE storage_category SET Category = \"{category}\" WHERE ID = {id};";
+                sql = $"UPDATE storage_category SET Category = \"{updateStorageCatModel.Category}\" WHERE ID = {updateStorageCatModel.ID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 return Ok("Succes");
@@ -232,21 +232,21 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateStorage(int categoryID, int addressID)
+        public ActionResult CreateStorage(VStorageModel createStorage)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VStorageModel data = new VStorageModel()
-                {
-                    StorageCatID = categoryID,
-                    AddressID = addressID
-                };
+                //VStorageModel data = new VStorageModel()
+                //{
+                //    StorageCatID = categoryID,
+                //    AddressID = addressID
+                //};
 
                 string sql;
                 sql = @"INSERT INTO storage (StorageCatID, AddressID) VALUES (@StorageCatID, @AddressID);";
-                var result = SqlDataAccess.SaveData<VStorageModel>(sql, data);
+                var result = SqlDataAccess.SaveData<VStorageModel>(sql, createStorage);
 
                 return this.StatusCode(StatusCodes.Status201Created,"Succes");
             }
@@ -259,7 +259,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateStorage(int id, int categoryID, int addressID)
+        public ActionResult UpdateStorage(VStorageModel updateStorage)
         {
             try
             {
@@ -267,7 +267,7 @@ namespace Vextech_API.Controllers
 
                 string sql;
 
-                sql = $"UPDATE storage SET StorageCatID={categoryID}, AddressID={addressID} WHERE ID = {id};";
+                sql = $"UPDATE storage SET StorageCatID={updateStorage.StorageCatID}, AddressID={updateStorage.AddressID} WHERE ID = {updateStorage.ID};";
                 var result = SqlDataAccess.UpdateData(sql);
 
                 return Ok("Succes");

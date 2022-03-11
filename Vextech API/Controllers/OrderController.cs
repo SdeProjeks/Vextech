@@ -89,22 +89,22 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateOrder(ulong userID, string address, string postnumber, string country, List<VOrderProductModel> products)
+        public ActionResult CreateOrder(VOrderModel createOrder, List<VOrderProductModel> products)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VOrderModel data = new()
-                {
-                    UserID = userID,
-                    Address = address,
-                    PostNumber = postnumber,
-                    Country = country,
-                };
+                //VOrderModel data = new()
+                //{
+                //    UserID = userID,
+                //    Address = address,
+                //    PostNumber = postnumber,
+                //    Country = country,
+                //};
 
                 string sql = @"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES (@UserID,@Address,@PostNumber,@Country)";
-                var result = SqlDataAccess.SaveData<VOrderModel>(sql, data);
+                var result = SqlDataAccess.SaveData<VOrderModel>(sql, createOrder);
 
                 foreach (VOrderProductModel product in products)
                 {

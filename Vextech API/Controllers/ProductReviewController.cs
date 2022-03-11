@@ -166,24 +166,24 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateProductReview(ulong UserID, int ProductID, string Comment, int Rating)
+        public ActionResult CreateProductReview(VProductReviewModel createProductReview)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VProductReviewModel data = new()
-                {
-                    ProductID = ProductID,
-                    UserID = UserID,
-                    comment = Comment,
-                    Rating = Rating,
-                };
+                //VProductReviewModel data = new()
+                //{
+                //    ProductID = ProductID,
+                //    UserID = UserID,
+                //    comment = Comment,
+                //    Rating = Rating,
+                //};
 
                 string sql;
                 sql = @"INSERT INTO product_reviews (ProductID,UserID, Comment, Rating) VALUES (@ProductID, @UserID, @comment, @Rating);";
 
-                var result = SqlDataAccess.SaveData<VProductReviewModel>(sql, data);
+                var result = SqlDataAccess.SaveData<VProductReviewModel>(sql, createProductReview);
 
                 return Ok("Review has been added");
             }
@@ -196,14 +196,14 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateProductReview(ulong ID, string Comment, int Rating)
+        public ActionResult UpdateProductReview(VProductReviewModel updateProductReview)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
                 string sql;
-                sql = $"UDPATE product_reviews SET Comment='{Comment}', Rating = {Rating} WHERE ID = {ID}";
+                sql = $"UDPATE product_reviews SET Comment='{updateProductReview.comment}', Rating = {updateProductReview.Rating} WHERE ID = {updateProductReview.ID}";
                 
                 var result = SqlDataAccess.UpdateData(sql);
 

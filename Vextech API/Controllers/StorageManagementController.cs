@@ -54,21 +54,21 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddProductToStorage(int storageID, int productID, int count)
+        public ActionResult AddProductToStorage(VStorageProductModel addProductToStorage)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VStorageProductModel data = new()
-                {
-                    StorageID = storageID,
-                    ProductID = productID,
-                    Quantity = count
-                };
+                //VStorageProductModel data = new()
+                //{
+                //    StorageID = storageID,
+                //    ProductID = productID,
+                //    Quantity = count
+                //};
 
                 string sql = @"INSERT INTO storage_products (StorageID,ProductID,Quantity) VALUES (@StorageID, @ProductID, @Quantity)";
-                var result = SqlDataAccess.SaveData<VStorageProductModel>(sql,data);
+                var result = SqlDataAccess.SaveData<VStorageProductModel>(sql, addProductToStorage);
 
                 return this.StatusCode(StatusCodes.Status201Created,"Product was successfully added to the storage");
             }
@@ -81,21 +81,21 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateProductCountForStorage(int storageID, int productID, int count)
+        public ActionResult UpdateProductCountForStorage(VStorageProductModel updateProductCount)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VStorageProductModel data = new()
-                {
-                    StorageID = storageID,
-                    ProductID = productID,
-                    Quantity = count
-                };
+                //VStorageProductModel data = new()
+                //{
+                //    StorageID = storageID,
+                //    ProductID = productID,
+                //    Quantity = count
+                //};
 
                 string sql = @"UPDATE storage_products SET Quantity=@Quantity WHERE StorageID=@StorageID AND ProductID=@ProductID;";
-                var result = SqlDataAccess.SaveData<VStorageProductModel>(sql,data);
+                var result = SqlDataAccess.SaveData<VStorageProductModel>(sql, updateProductCount);
 
                 return Ok("Product quantity updated for the storage successfully.");
             }
@@ -109,13 +109,13 @@ namespace Vextech_API.Controllers
 
 
         [HttpDelete]
-        public ActionResult DeleteProductFromStorage(int storageID, int productID)
+        public ActionResult DeleteProductFromStorage(VStorageProductModel deleteProduct)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                string sql = $"DELETE FROM storage_products WHERE StorageID={storageID} AND ProductID={productID};";
+                string sql = $"DELETE FROM storage_products WHERE StorageID={deleteProduct.StorageID} AND ProductID={deleteProduct.ProductID};";
                 var result = SqlDataAccess.DeleteData(sql);
 
                 return Ok("Product has been removed from the storage.");

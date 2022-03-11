@@ -66,20 +66,20 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateRole(string name)
+        public ActionResult CreateRole(RoleModel createRole)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                RoleModel data = new RoleModel()
-                {
-                    Name = name
-                };
+                //RoleModel data = new RoleModel()
+                //{
+                //    Name = name
+                //};
                 string sql;
                 sql = @"INSERT INTO roles (name) VALUES (@Name);";
                 
-                var result = SqlDataAccess.SaveData<RoleModel>(sql,data);
+                var result = SqlDataAccess.SaveData<RoleModel>(sql, createRole);
                 return Ok("Role created succesfully");
             }
             catch (Exception ex)
@@ -91,19 +91,19 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateRoleByName(ulong id, string name) 
+        public ActionResult UpdateRoleByName(RoleModel updateRole) 
         {
             try 
 	        {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                RoleModel data = new RoleModel()
-                {
-                    ID = id,
-                    Name = name
-                };
+                //RoleModel data = new RoleModel()
+                //{
+                //    ID = id,
+                //    Name = name
+                //};
                 string sql;
-                sql = $"UPDATE roles SET Name = '{name}' WHERE ID = {id};";
+                sql = $"UPDATE roles SET Name = '{updateRole.Name}' WHERE ID = {updateRole.ID};";
 
                 var result = SqlDataAccess.UpdateData(sql);
 
@@ -210,6 +210,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
+        // Check agian
         public ActionResult CreateAndUpdateRolePermissions (ulong role_id, List<ulong>? permissions)
         {
             try
@@ -227,7 +228,7 @@ namespace Vextech_API.Controllers
                         VRoleHasPermissionModel data = new VRoleHasPermissionModel()
                         {
                             RoleID = role_id,
-                            PermissionID = permissionID
+                            PermissionID = permissionID 
                         };
 
                         sql = @"INSERT INTO role_has_permission (RoleID,PermissionID) VALUES (@RoleID,@PermissionID)";
