@@ -1,33 +1,25 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿@model IEnumerable<Vextech_APP.ViewModels.ProductModel>
+@{
+    ViewData["Title"] = "Home Page";
 }
-  <div class="product-info">
-    <img src="/img/VanGogh.jpg" />
-    <h3>Mug</h3>
-    <ul class="products-props">
-      <li>Price: $9.99</li>
-      <li>Artist: Van Gogh</li>
-      <li>Title: </li>
-      <li>Description: Self-Portrait</li>
-    </ul>
-    <button id="buyButton">Buy</button>
-  </div>
 
-  <div id="login-block">
-    <div class="toggle-item">Login</div>
-    <div class="popup-form">
-      <form>
-        <div>
-          <label>Username</label>
-          <input />
+<header>
+    <link href="~/css/index.css" rel="stylesheet" />
+</header>
+
+<div class="container">
+    <div class="row flex-row flex-nowrap overflow-scroll">
+    @foreach (var item in Model) {
+        <div class="card col-2">
+            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
+            <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
+@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+            <div class="mt-auto">
+                <button>Add to Cart</button>
+            </div>
+            
         </div>
-        <div>
-          <label>Password</label>
-          <input type="password" />
-        </div>
-        <div>
-          <input type="submit" value="Login" />
-        </div>
-      </form>
+    }
     </div>
-  </div>
+</div>
