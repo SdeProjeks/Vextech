@@ -1,17 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Vextech_APP.ViewModels.ProductModels;
 using Vextech_APP.ViewModels;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace Vextech_APP.Controllers
 {
     public class AppController : Controller
     {
         HttpClient client = new();
-        IEnumerable<ProductModel> products = null;
+        IEnumerable<ProductViewModel> products = null;
+        IEnumerable<ContactViewModel> contact = null;
+        private object jsonObject;
 
         public IActionResult Index()
         {
+
+            string apiurl = ConnectionController.getConnectionString();
+
             // Sets the url
-            client.BaseAddress = new Uri("http://localhost:8080/api/Product/");
+            client.BaseAddress = new Uri(apiurl + "Product/");
             // Contacts an api endpoint inside of products then waits for it to finish:
             var responseTask = client.GetAsync("GetProducts");
             responseTask.Wait();
@@ -20,14 +28,14 @@ namespace Vextech_APP.Controllers
             var result = responseTask.Result;
             if (result.IsSuccessStatusCode)
             {
-                var readtask = result.Content.ReadFromJsonAsync<IList<ProductModel>>();
+                var readtask = result.Content.ReadFromJsonAsync<IList<ProductViewModel>>();
                 readtask.Wait();
 
                 products = readtask.Result;
             }
             else
             {
-                products = Enumerable.Empty<ProductModel>();
+                products = Enumerable.Empty<ProductViewModel>();
                 ModelState.AddModelError(string.Empty, "an error has occoured. please contact your administrator.");
             }
 
@@ -37,7 +45,8 @@ namespace Vextech_APP.Controllers
         [HttpGet("contact")]
         public IActionResult Contact()
         {
-            return View();
+            ContactViewModel model = new();
+            return View(model);
         }
 
         [HttpPost("contact")]
@@ -45,7 +54,28 @@ namespace Vextech_APP.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Send to database
+                string apiurl = ConnectionController.getConnectionString();
+                var jsonContent = JsonConvert.SerializeObject(new { name = model.Name, email = model.Email, message = model.Message, session="null" });
+                var content = new StringContent(jsonContent.ToString(), Encoding.UTF8, "application/json");
+
+                // Sets the uri
+                Uri uri = new(apiurl + $"Contact/CreateContact?name={model.Name}&email={model.Email}&message={model.Message}&session=null");
+                // Contacts an api endpoint inside of contacts then waits for it to finish:
+                var responseTask = client.PostAsync(uri, content);
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    ModelState.Clear();
+                    model.Success = "Success";
+                    return View(model);
+                }
+                else
+                {
+                    contact = Enumerable.Empty<ContactViewModel>();
+                    ModelState.AddModelError(string.Empty, "an error has occoured. please try again later.");
+                }
             }
 
             return View();

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vextech_APP.ViewModels
+namespace Vextech_APP.ViewModels.ProductModels
 {
-    public class ProductModel
+    public class ProductViewModel
     {
         public int ID { get; set; }
         public ProductBrandModel Brand { get; set; }
