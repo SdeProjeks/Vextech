@@ -5,15 +5,14 @@ namespace Vextech_APP.ViewModels
     public class ContactViewModel
     {
         [Required]
-        [MinLength(2, ErrorMessage = "Username to short")]
-        public string username { get; set; }
+        [StringLength(50, ErrorMessage = "Shorten your name")]
+        public string Name { get; set; }
         [Required]
         [EmailAddress]
-        public string email { get; set; }
+        [StringLength(50, ErrorMessage = "your email is to long")]
+        public string Email { get; set; }
         [Required]
-        public string subject { get; set; }
-        [Required]
-        [MaxLength(300, ErrorMessage = "Message to long")]
-        public string message { get; set; }
+        public string Message { get; set; }
+        public string Success { get; set; } = "";
     }
 }

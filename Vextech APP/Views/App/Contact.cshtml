@@ -7,27 +7,46 @@
     <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
 }
 
-<form method="post">
-  <div asp-validation-summary="ModelOnly"></div>
-  <label asp-for="username">Username:</label>
-  <br />
-  <input asp-for="username"/>
-  <span asp-validation-for="username"></span>
-  <br />
-  <label asp-for="email">Email:</label>
-  <br />
-  <input type="email" asp-for="email" />
-  <span asp-validation-for="email"></span>
-  <br />
-  <label asp-for="subject">Subject:</label>
-  <br />
-  <input type="text" asp-for="subject"/>
-  <span asp-validation-for="subject"></span>
-  <br />
-  <label asp-for="message">Message:</label>
-  <br />
-  <textarea rows="4" asp-for="message"> </textarea>
-  <span asp-validation-for="message"></span>
-  <br />
-  <input type="submit" value="Send Message" />
-</form>
+<div class="col-12">
+        <form method="post">
+              <div asp-validation-summary="ModelOnly"></div>
+              <div class="mb-3">
+                <label asp-for="Name" class="form-label">Username:</label>
+                <br />
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="form-text"></span>
+              </div>
+              <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email:</label>
+                <br />
+                <input type="email" asp-for="Email" class="form-control"/>
+                <span asp-validation-for="Email" class="form-text"></span>
+              </div>
+              <div class="mb-3">
+                <span asp-for="Message" class="form-label">Message:</span>
+                <br />
+                <textarea rows="4" asp-for="Message" class="form-control"> </textarea>
+                <span asp-validation-for="Message" class="form-text"></span>
+              </div>
+              <div class="align-content-center mb-3">
+                <input type="submit" value="Send Message" class="btn btn-primary"/>
+              </div>
+        </form>
+
+    <div class="col-12 align-content-center">
+        @if (Model.Success != null || Model.Success != "")
+        {
+            <div class="container">
+              <div class="row">
+                <div class="col-12 justify-content-between">
+                   <p class="text-center">@Model.Success</p>
+                </div>
+              </div>
+            </div>
+            Model.Name = "";
+            Model.Email = "";
+            Model.Message = "";
+        }
+    </div>
+</div>
+

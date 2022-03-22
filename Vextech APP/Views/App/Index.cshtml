@@ -1,21 +1,31 @@
-﻿@model IEnumerable<Vextech_APP.ViewModels.ProductModel>
+﻿@model IEnumerable<Vextech_APP.ViewModels.ProductModels.ProductViewModel>
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome";
 }
 
 <header>
     <link href="~/css/index.css" rel="stylesheet" />
 </header>
 
+<div>
+    <form class="d-flex">
+	    <input class="form-control me-2" type="text" placeholder="Search">
+	    <button class="btn btn-primary" type="button">Search</button>
+    </form>
+</div>
+
+<h1>Newest products</h1>
 <div class="container">
     <div class="row flex-row flex-nowrap overflow-scroll">
     @foreach (var item in Model) {
         <div class="card col-2">
-            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
-            <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
-            <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
+            <a class="nav-link" asp-controller="App" asp-action="Contact">
+                <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            </a>
+            <h1><a class="nav-link" asp-controller="App" asp-action="Contact">@Html.DisplayFor(modelItem => item.Name)</a></h1>
 @*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
             <div class="mt-auto">
+                <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
                 <button>Add to Cart</button>
             </div>
             
@@ -23,3 +33,42 @@
     }
     </div>
 </div>
+<br />
+
+<h1>Best rated products</h1>
+<div class="container">
+    <div class="row flex-row flex-nowrap overflow-scroll">
+    @foreach (var item in Model) {
+        <div class="card col-2">
+            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
+@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+            <div class="mt-auto">
+                <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
+                <button>Add to Cart</button>
+            </div>
+            
+        </div>
+    }
+    </div>
+</div>
+<br />
+
+<h1>Products</h1>
+<div class="container">
+    <div class="row flex-row flex-nowrap overflow-scroll">
+    @foreach (var item in Model) {
+        <div class="card col-2">
+            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
+@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+            <div class="mt-auto">
+                <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
+                <button>Add to Cart</button>
+            </div>
+            
+        </div>
+    }
+    </div>
+</div>
+<br />

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Vextech_APP.ViewModels
+namespace Vextech_APP.ViewModels.ProductModels
 {
     public class ProductBrandModel
     {
