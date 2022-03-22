@@ -4,7 +4,7 @@ namespace Vextech_API.Models
 {
     public class UserMobileModel
     {
-        public UserModel user { get; set; }
+        public ulong userID { get; set; }
         public MobileCategoryModel mobileCategory { get; set; }
         [Required]
         [RegularExpression(@"^\+(?:[0-9]\x20?){4-16}[0-9]$")]

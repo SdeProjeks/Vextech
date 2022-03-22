@@ -4,6 +4,9 @@ using Vextech_API.DataAccess;
 using Vextech_API.Models;
 using Vextech_API.Models.ViewModels;
 using System.Reflection;
+using System.Data;
+using MySqlConnector;
+using Dapper;
 
 namespace Vextech_API.Controllers
 {
@@ -89,11 +92,22 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateOrder(VOrderModel createOrder, List<VOrderProductModel> products)
+        public ActionResult CreateOrder(OrderModel order, string s)
         {
+            //VOrderModel createOrder, List<OrderProductModel> products;
             try
             {
-                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
+                {
+                    string sql = $"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES ({order.User.ID},{order.Address},{order.PostNumber},{order.Country})";
+                    connection.Execute(sql);
+                    foreach (OrderProductModel product in order.Products)
+                    {
+                        sql = @"INSERT INTO order_products (OrderID, ProductID, Amount, Price) VALUES ((SELECT MAX(ID) FROM Orders),@ProductID,@Amount,@Price);";
+                        connection.Execute(sql, product);
+                    }
+                };
+                    LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
                 //VOrderModel data = new()
                 //{
@@ -103,20 +117,17 @@ namespace Vextech_API.Controllers
                 //    Country = country,
                 //};
 
-                string sql = @"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES (@UserID,@Address,@PostNumber,@Country)";
-                var result = SqlDataAccess.SaveData<VOrderModel>(sql, createOrder);
+                //string sql = @"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES (@UserID,@Address,@PostNumber,@Country)";
+                //var result = SqlDataAccess.SaveData<VOrderModel>(sql, createOrder);
 
-                foreach (VOrderProductModel product in products)
-                {
-                    sql = @"INSERT INTO order_products (OrderID, ProductID, Amount, Price) VALUES ((SELECT MAX(ID) FROM Orders),@ProductID,@Amount,@Price);";
-                    SqlDataAccess.SaveData<VOrderProductModel>(sql, product);
-                }
+                
 
                 return Ok("Order has been created.");
             }
             catch (Exception ex)
             {
                 LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+                throw;
 
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
             }
