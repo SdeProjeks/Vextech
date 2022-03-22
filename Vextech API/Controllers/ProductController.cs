@@ -163,6 +163,10 @@ namespace Vextech_API.Controllers
                         )
                         .Distinct()
                         .ToList();
+                    if (list.Capacity == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
+                    }
                     return list;
                 }
 
@@ -330,7 +334,7 @@ namespace Vextech_API.Controllers
         {
             try
             {
-                //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID; "
+                //gets product as a admin
                 string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
                     "products.BrandID, product_brand.ID, product_brand.Brand, " +
                     "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
@@ -341,8 +345,9 @@ namespace Vextech_API.Controllers
                     "INNER JOIN product_categories " +
                     "ON products.ID = product_categories.ProductID " +
                     "INNER JOIN product_category_names " +
-                    "ON product_categories.CategoryID = product_category_names.ID" +
+                    "ON product_categories.CategoryID = product_category_names.ID " +
                     $"WHERE products.ID = {id}";
+
                 using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
                     //a map over the products that has ben mapt  
@@ -368,7 +373,12 @@ namespace Vextech_API.Controllers
                         )
                         .Distinct()
                         .ToList();
+                    if (list.Capacity == 0)
+                    {
+                        return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
+                    }
                     return list;
+
                 }
 
                 //string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id};";
@@ -418,7 +428,7 @@ namespace Vextech_API.Controllers
                 //    return products;
                 //}
 
-                //return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
+                
             }
             catch (Exception)
             {
@@ -427,33 +437,28 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateProduct(string name, string description, int brandID, decimal price, DateTime? release_date, int active, List<int> categories)
+        public ActionResult CreateProduct(ProductModel product)
         {
             try
             {
-
-
-                VProductModel data = new()
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    Name = name,
-                    Description = description,
-                    BrandID = brandID,
-                    Price = price,
-                    Release_date = release_date,
-                    Active = active
-                };
-
-                string sql = @"INSERT INTO products (Name, Description, BrandID, Price, Release_date, Active) VALUES (@Name, @Description, @BrandID, @Price, @Release_date, @Active)";
-                var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
-
-                foreach (var category in categories)
-                {
-                    VProductCategoriesModel categoryModel = new()
+                    //has not a release date
+                    string sql = $"INSERT INTO products (Name, Description, BrandID, Price, Active) VALUES ('{product.Name}', '{product.Description}', '{product.Brand.ID}', '{product.Price}','{product.Active}')";
+                    //has a release date
+                    if (product.Release_date != null)
                     {
-                        CategoryID = category
-                    };
-                    sql = @"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES ((SELECT MAX(ID) FROM products), @CategoryID);";
-                    results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
+                        var release_date = Convert.ToDateTime(product.Release_date).ToString("yyyy-MM-dd HH:mm:ss");
+                        sql = $"INSERT INTO products (Name, Description, BrandID, Price, Release_date, Active) VALUES ('{product.Name}', '{product.Description}', '{product.Brand.ID}', '{product.Price}','{release_date}','{product.Active}')";
+                    }
+                    connection.Execute(sql);
+                    // Create all the relation to the products categories.  
+                    foreach (var category in product.Categories)
+                    {
+
+                        sql = $"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES ((SELECT MAX(ID) FROM products), '{category.ID}')";
+                        connection.Execute(sql);
+                    }
                 }
 
                 return this.StatusCode(StatusCodes.Status201Created, "Product was created successfully");
@@ -463,40 +468,67 @@ namespace Vextech_API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs. Please change your inputs and try again.");
             }
         }
+        //[HttpPost]
+        //public ActionResult CreateProduct(string name, string description, int brandID, decimal price, DateTime? release_date, int active, List<int> categories)
+        //{
+        //    try
+        //    {
 
+
+        //        VProductModel data = new()
+        //        {
+        //            Name = name,
+        //            Description = description,
+        //            BrandID = brandID,
+        //            Price = price,
+        //            Release_date = release_date,
+        //            Active = active
+        //        };
+
+        //        string sql = @"INSERT INTO products (Name, Description, BrandID, Price, Release_date, Active) VALUES (@Name, @Description, @BrandID, @Price, @Release_date, @Active)";
+        //        var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
+
+        //        foreach (var category in categories)
+        //        {
+        //            VProductCategoriesModel categoryModel = new()
+        //            {
+        //                CategoryID = category
+        //            };
+        //            sql = @"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES ((SELECT MAX(ID) FROM products), @CategoryID);";
+        //            results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
+        //        }
+
+        //        return this.StatusCode(StatusCodes.Status201Created, "Product was created successfully");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid inputs. Please change your inputs and try again.");
+        //    }
+        //}
         [HttpPut]
-        public ActionResult UpdateProduct(int id, string name, string description, int brandID, decimal price, DateTime? release_date, int active, List<int> categories)
+        public ActionResult UpdateProduct(ProductModel product)
         {
             try
             {
-                VProductModel data = new()
+                using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
-                    ID = id,
-                    Name = name,
-                    Description = description,
-                    BrandID = brandID,
-                    Price = price,
-                    Active = active
-                };
+                    var release_date = Convert.ToDateTime(product.Release_date).ToString("yyyy-MM-dd HH:mm:ss");
+                    // Update product
+                    string sql = $"UPDATE products SET Name='{product.Name}', Description='{product.Description}', BrandID='{product.Brand.ID}', Price='{product.Price}', Release_date='{release_date}', Active='{product.Active}' WHERE ID = '{product.ID}';";
 
-                // Update product
-                string sql = @"UPDATE products SET Name=@Name, Description=@Description, BrandID=@BrandID, Price=@Price, Release_date=@Release_date, Active=@Active WHERE ID = @ID;";
-                var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
 
-                // Delete all connected categories to then reapply them later
-                sql = $"DELETE FROM product_categories WHERE ProductID = {id}";
-                results = SqlDataAccess.DeleteData(sql);
+                    connection.Execute(sql);
 
-                // Create all the relation to the products categories.
-                foreach (var category in categories)
-                {
-                    VProductCategoriesModel categoryModel = new()
+                    // Delete all connected categories to then reapply them later
+                    sql = $"DELETE FROM product_categories WHERE ProductID = '{product.ID}'";
+                    connection.Execute(sql);
+
+                    // Create all the relation to the products categories.
+                    foreach (var category in product.Categories)
                     {
-                        ProductID = id,
-                        CategoryID = category
-                    };
-                    sql = @"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES (@ProductID, @CategoryID);";
-                    results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
+                        sql = @$"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES ('{product.ID}', '{category.ID}');";
+                        connection.Execute(sql);
+                    }
                 }
 
                 return Ok("Product was updated successfully");
@@ -506,6 +538,48 @@ namespace Vextech_API.Controllers
                 return this.StatusCode(StatusCodes.Status404NotFound, "We did not find the product to update in the database nothing was updated.");
             }
         }
+        //[HttpPut]
+        //public ActionResult UpdateProduct(int id, string name, string description, int brandID, decimal price, DateTime? release_date, int active, List<int> categories)
+        //{
+        //    try
+        //    {
+        //        VProductModel data = new()
+        //        {
+        //            ID = id,
+        //            Name = name,
+        //            Description = description,
+        //            BrandID = brandID,
+        //            Price = price,
+        //            Active = active
+        //        };
+
+        //        // Update product
+        //        string sql = @"UPDATE products SET Name=@Name, Description=@Description, BrandID=@BrandID, Price=@Price, Release_date=@Release_date, Active=@Active WHERE ID = @ID;";
+        //        var results = SqlDataAccess.SaveData<VProductModel>(sql, data);
+
+        //        // Delete all connected categories to then reapply them later
+        //        sql = $"DELETE FROM product_categories WHERE ProductID = {id}";
+        //        results = SqlDataAccess.DeleteData(sql);
+
+        //        // Create all the relation to the products categories.
+        //        foreach (var category in categories)
+        //        {
+        //            VProductCategoriesModel categoryModel = new()
+        //            {
+        //                ProductID = id,
+        //                CategoryID = category
+        //            };
+        //            sql = @"INSERT INTO product_categories (product_categories.ProductID, product_categories.CategoryID) VALUES (@ProductID, @CategoryID);";
+        //            results = SqlDataAccess.SaveData<VProductCategoriesModel>(sql, categoryModel);
+        //        }
+
+        //        return Ok("Product was updated successfully");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return this.StatusCode(StatusCodes.Status404NotFound, "We did not find the product to update in the database nothing was updated.");
+        //    }
+        //}
 
 
         [HttpPut]
