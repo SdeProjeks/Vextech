@@ -8,7 +8,6 @@ namespace Vextech_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [AutoValidateAntiforgeryToken]
     [Consumes("application/json")]
     [Produces("application/json")]
     public class ContactController : ControllerBase

@@ -8,7 +8,6 @@ namespace Vextech_API.Models
 
         [Required]
         [StringLength(50,ErrorMessage = "Shorten your name")]
-        [RegularExpression(@"^[a-zæøåA-ZÆØÅ''-'\s]", ErrorMessage = "can only contain lowercase and uppercate letters")]
         public string Name { get; set; }
         
         [Required]
@@ -17,7 +16,6 @@ namespace Vextech_API.Models
         public string Email { get; set; }
         
         [Required]
-        [RegularExpression(@"^[a-zæøåA-ZÆØÅ0-9!&''-'\s]",ErrorMessage = "Can only contain some special charactors")]
         public string Message { get; set; }
     }
 }
