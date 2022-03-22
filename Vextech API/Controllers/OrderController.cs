@@ -120,14 +120,11 @@ namespace Vextech_API.Controllers
                 //string sql = @"INSERT INTO orders (UserID, Address, PostNumber, Country) VALUES (@UserID,@Address,@PostNumber,@Country)";
                 //var result = SqlDataAccess.SaveData<VOrderModel>(sql, createOrder);
 
-                
-
                 return Ok("Order has been created.");
             }
             catch (Exception ex)
             {
                 LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
-                throw;
 
                 return this.StatusCode(StatusCodes.Status400BadRequest, "Your order was not created due to wrong inputs try changing your inputs and try again.");
             }
