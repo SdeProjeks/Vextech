@@ -53,23 +53,23 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreatePhonenumber(ulong userID, ulong mobilCategoryID, string phoneNumber)
+        public ActionResult CreatePhonenumber(VUserMobileModel createPhoneNumber)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                VUserMobileModel data = new VUserMobileModel()
-                {
-                    UserID = userID,
-                    MobileCategoryID = mobilCategoryID,
-                    PhoneNumber = phoneNumber
-                };
+                //VUserMobileModel data = new VUserMobileModel()
+                //{
+                //    UserID = userID,
+                //    MobileCategoryID = mobilCategoryID,
+                //    PhoneNumber = phoneNumber
+                //};
 
                 string sql;
                 sql = @"INSERT INTO user_phonenumbers (UserID,MobileCategoryID,PhoneNumber) VALUES (@UserID, @MobileCategoryID, @PhoneNumber)";
                 
-                var result = SqlDataAccess.SaveData(sql, data);
+                var result = SqlDataAccess.SaveData(sql, createPhoneNumber);
                 return Ok("Added your Phone Number succesfully");
             }
             catch (Exception ex)

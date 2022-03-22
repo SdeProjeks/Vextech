@@ -64,21 +64,21 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreatePermission(string name)
+        public ActionResult CreatePermission(PermissionModel createPermission)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                PermissionModel data = new PermissionModel()
-                {
-                    Name = name
-                };
+                //PermissionModel data = new PermissionModel()
+                //{
+                //    Name = name
+                //};
 
                 string sql;
                 sql = @"INSERT INTO permissions (Name) VALUES (@Name);";
 
-                var result = SqlDataAccess.SaveData<PermissionModel>(sql, data);
+                var result = SqlDataAccess.SaveData<PermissionModel>(sql, createPermission);
                 
                 return Ok("Created the permission succcesfully");
             }
@@ -91,20 +91,20 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdatePermissionByName(ulong id, string name)
+        public ActionResult UpdatePermissionByName(PermissionModel updatePermission)
         {
             try
             {
                 LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                PermissionModel data = new PermissionModel()
-                {
-                    ID = id,
-                    Name = name
-                };
+                //PermissionModel data = new PermissionModel()
+                //{
+                //    ID = id,
+                //    Name = name
+                //};
 
                 string sql;
-                sql = $"UPDATE permissions SET Name = '{name}' WHERE ID = {id}";
+                sql = $"UPDATE permissions SET Name = '{updatePermission.Name}' WHERE ID = {updatePermission.ID}";
 
                 var result = SqlDataAccess.UpdateData(sql);
 
