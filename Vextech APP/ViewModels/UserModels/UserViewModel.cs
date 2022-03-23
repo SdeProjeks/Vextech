@@ -25,7 +25,7 @@ namespace Vextech_APP.ViewModels.UserModels
         // hashed password
         [StringLength(256, ErrorMessage = "Password must be between 8 and 256", MinimumLength = 8)]
         [DataType(DataType.Password)]
-        [RegularExpression(@"^(?=.*?[A-ZÆØÅ])(?=.*?[a-zæøå])(?=.*?[0-9])(?=.*?[!#¤%&?@$+-*^]){8,40}.$",
+        [RegularExpression(@"^(?=.*[A-ZÆØÅ])(?=.*[a-zæøå])(?=.*\d)(?=.*\W).{8,40}",
         ErrorMessage = "Password must contain atleast 1 number, 1 upper and lowercase letter and 1 special character")]
         public string Password { get; set; }
 
@@ -59,5 +59,6 @@ namespace Vextech_APP.ViewModels.UserModels
 (SK)?[0-9]{10}                                #Slovakia)$")]
         public string VatID { get; set; }
         public List<UserMobileViewModel>? PhoneNumbers { get; set; }
+        public string Session { get; set; }
     }
 }

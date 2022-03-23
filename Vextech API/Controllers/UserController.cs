@@ -7,6 +7,7 @@ using System.Reflection;
 using Vextech_API.Controllers;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Vextech_API.Controllers
 {
@@ -181,60 +182,35 @@ namespace Vextech_API.Controllers
             }
         }
         
-        [HttpPost]
-        public ActionResult<UserModel> Userlogin(string email, string password, string session = "null")
+        [HttpGet]
+        public ActionResult<UserModel> Userlogin(string email, string password)
         {
             try
             {
                 Users = new();
-                if (session == "null")
+                string sql;
+
+                // QUICK FIX replace all spaces with + because fuck do i know.
+                sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email='{email}' AND Password='{Regex.Replace(password, @"\s+", "+")}'";
+                var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+                foreach (var user in databaseResult)
                 {
-                    string sql;
-                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
-                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
-                    foreach (var user in databaseResult)
+                    UserModel users = new()
                     {
-                        UserModel users = new()
-                        {
-                            ID = user.ID,
-                            Firstname = user.Firstname,
-                            Lastname = user.Lastname
-                        };
-                        Users.Add(users);
-                    }
-                    if (Users.Count == 0)
-                    {
-                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
-                    }
-
-                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
-
-                    return Users[0];
+                        ID = user.ID,
+                        Firstname = user.Firstname,
+                        Lastname = user.Lastname
+                    };
+                    Users.Add(users);
                 }
-                else
+                if (Users.Count == 0)
                 {
-                    string sql;
-                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
-                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
-                    foreach (var User in databaseResult)
-                    {
-                        UserModel users = new()
-                        {
-                            ID = User.ID,
-                            Firstname = User.Firstname,
-                            Lastname = User.Lastname
-                        };
-                        Users.Add(users);
-                    }
-                    if (Users.Count == 0)
-                    {
-                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
-                    }
-
-                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID, session);
-
-                    return Users[0];
+                    return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
                 }
+
+                Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
+
+                return Users[0];
             }
             catch (Exception ex)
             {
