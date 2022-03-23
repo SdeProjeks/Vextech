@@ -35,7 +35,9 @@ namespace Vextech_APP.Controllers
                     var readtask = result.Content.ReadFromJsonAsync<UserViewModel>();
                     readtask.Wait();
 
-                    HttpContext.Response.Cookies.Append("Testing", "Do i Exist?");
+                    HttpContext.Response.Cookies.Append("Session", readtask.Result.Session);
+                    HttpContext.Response.Cookies.Append("firstname", readtask.Result.Firstname);
+                    HttpContext.Response.Cookies.Append("lastname", readtask.Result.Lastname);
 
                     return RedirectToAction("Index","App");
                 }
