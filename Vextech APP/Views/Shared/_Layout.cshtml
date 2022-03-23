@@ -9,23 +9,58 @@
   <link href="~/css/site.css" rel="stylesheet" />
 </head>
 <body>
-	<header class="container-fluid bg-secondary">
-		<div class="container">
-			<div class="row align-items-center">
-				<div class="col-2">
-					<button class="dropdown dropdown-toggle btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#productCategory" aria-controls="productCategory" aria-expanded="false" aria-label="Toggle navigation">
-						<span>Choose category</span>
-					</button>
+	<header class="container-view">
+		<div class="navbar navbar-inverse navbar-static-top navbar-Background navbar-Link-color-white text-color-white">
+			<div class="row col-12">
+				<div class="col-12 reset-padding">
+					<div class="row ">
+						<div class="col-6 reset-padding">
+							<a href="http://localhost:4040/" style=" float:left">
+								<img src="~/img/VexTechLogo.png"/>
+							</a>
+						</div>
+						<div class="col-6 reset-padding align-items-center">
+							<ul class="float-right fill-the-height">
+								<li class="nav-link">
+									<button class="btn btn-primary">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+											<path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+										</svg>
+									</button>
+								</li>
+								<li class="nav-link">
+									<button class="btn btn-primary">
+										<a class="nav-link" asp-controller="App" asp-action="Contact">Contact</a>
+									</button>
+								</li>
+								<li class="nav-link">
+									<button class="btn btn-primary">
+										<a class="nav-link" asp-controller="App" asp-action="About">Login</a>
+									</button>
+								</li>
+							</ul>
+						</div>	
+					</div>
 				</div>
-				<div class="col-2">
-					<img src="~/img/VexTechLogo.png" href="" style="height:75px;width:max-content"/>
+				<div class="col-12 reset-padding border-dashed-white navbar-midel">
+					<div class="row">
+						<div class="col-9 reset-padding">
+							<div class="nav alignDropdownCenter">
+								<button class="dropdown dropdown-toggle btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#productCategory" aria-controls="productCategory" aria-expanded="false" aria-label="Toggle navigation">
+									<span>Choose category</span>
+								</button>
+							</div>
+						</div>
+						<div class="col-3 reset-padding">
+							<form class="d-flex">
+								<input class="form-control me-2" type="text" placeholder="Search">
+								<button class="btn btn-primary" type="button">Search</button>
+							</form>
+						</div>
+					</div>
 				</div>
-				<div class="col-4">
-					<form class="d-flex">
-						<input class="form-control me-2" type="text" placeholder="Search">
-						<button class="btn btn-primary" type="button">Search</button>
-					</form>
-				</div>
+			</div>
+			@*<div class="row align-items-center">
 				<div class="col-4">
 					<div class="d-flex flex-row-reverse">
 						<nav class="navbar navbar-expand-sm navbar-light">
@@ -33,7 +68,7 @@
 								<li class="nav-item">
 									<button class="btn btn-primary">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-										  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+											<path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
 										</svg>
 									</button>
 								</li>
@@ -50,8 +85,8 @@
 							</ul>
 						</nav>
 					</div>
-				<div>
-			</div>
+				</div>
+			</div>*@
 		</div>
 	</header>
 	<section class="container">
