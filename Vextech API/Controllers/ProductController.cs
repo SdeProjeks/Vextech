@@ -63,6 +63,7 @@ namespace Vextech_API.Controllers
                             productEntiry.Categories.Add(productCategoryName);
                             //sets the brand of the product
                             productEntiry.Brand = productBrand;
+                            //Sets the pictures and makes sure the same picture does not get set twice
                             bool result = true;
                             foreach (var item in productEntiry.Images)
                             {
@@ -138,15 +139,16 @@ namespace Vextech_API.Controllers
 
         [HttpGet("{id:int}")]
         //gets active product by id 
-        public ActionResult<List<ProductModel>> GetProduct(int id)
+        public ActionResult<ProductModel> GetProduct(int id)
         {
             try
             {
                 //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE products.Active = 1 AND  products.ID = {id}; "
-                string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
+                string sql = "SELECT products.ID, products.Name, products.Active, products.Description, products.Price, products.Release_date, " +
                     "products.BrandID, product_brand.ID, product_brand.Brand, " +
                     "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
-                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "product_category_names.Subcategory, product_category_names.Category, " +
+                    "product_images.ProductID, product_images.PictureName " +
                     "FROM products " +
                     "INNER JOIN product_brand " +
                     "ON products.BrandID = product_brand.ID " +
@@ -154,29 +156,45 @@ namespace Vextech_API.Controllers
                     "ON products.ID = product_categories.ProductID " +
                     "INNER JOIN product_category_names " +
                     "ON product_categories.CategoryID = product_category_names.ID " +
-                    $"WHERE products.Active = 1 AND  products.ID = {id}";
+                    "INNER JOIN product_images " +
+                    "ON product_images.ProductID = products.ID " +
+                    $"WHERE products.Active = 1 AND products.ID = {id}";
                 using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
                 {
                     //a map over the products that has ben mapt  
                     var productmap = new Dictionary<int, ProductModel>();
                     //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
-                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductImageModel, ProductModel>(
                         sql,
-                        (product, productBrand, productCategoryName) =>
+                        (product, productBrand, productCategoryName, productImage) =>
                         {
                             ProductModel productEntiry;
-                        //Create A product
-                        if (!productmap.TryGetValue(product.ID, out productEntiry))
+                            //Create A product
+                            if (!productmap.TryGetValue(product.ID, out productEntiry))
+                                {
+                                    productmap.Add(product.ID, productEntiry = product);
+                                }
+                            //sets the brand of the product
+                            productEntiry.Brand = productBrand;
+                            //adds a categorie to the product
+                            productEntiry.Categories.Add(productCategoryName);
+                            //Sets the pictures and makes sure the same picture does not get set twice
+                            bool result = true;
+                            foreach (var item in productEntiry.Images)
                             {
-                                productmap.Add(product.ID, productEntiry = product);
+                                if (item.PictureName == productImage.PictureName)
+                                {
+                                    result = false;
+                                }
                             }
-                        //sets the brand of the product
-                        productEntiry.Brand = productBrand;
-                        //adds a categorie to the product
-                        productEntiry.Categories.Add(productCategoryName);
+
+                            if (result)
+                            {
+                                productEntiry.Images.Add(productImage);
+                            }
 
                             return productEntiry;
-                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        }, splitOn: "Id,ProductID"//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
                         )
                         .Distinct()
                         .ToList();
@@ -184,60 +202,8 @@ namespace Vextech_API.Controllers
                     {
                         return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
                     }
-                    return list;
+                    return list[0];
                 }
-
-
-
-
-                //        //string sql = $"SELECT products.ID, products.Name, products.Description, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {id} AND products.Active = 1;";
-                //        //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                //        //if (DatabaseResults.Count == 0)
-                //        //{
-                //        //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find the product in the database.");
-                //        //}
-
-                //        //if (DatabaseResults.Count > 0)
-                //        //{
-                //        //    // Gets all the products categories:
-                //        //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {id};";
-                //        //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
-
-                //        //    // Creates new list to handle all the products categories:
-                //        //    categories = new();
-                //        //    foreach (var Databasecategory in CategoriesResult)
-                //        //    {
-                //        //        ProductCategoryNameModel category = new()
-                //        //        {
-                //        //            ID = Databasecategory.CategoryID,
-                //        //            Subcategory = Databasecategory.Subcategory,
-                //        //            Category = Databasecategory.Category
-                //        //        };
-                //        //        categories.Add(category);
-                //        //    }
-
-                //        //    // Creates a single product from a model
-                //        //    ProductModel products = new()
-                //        //    {
-                //        //        ID = DatabaseResults[0].ID,
-                //        //        Name = DatabaseResults[0].Name,
-                //        //        Description = DatabaseResults[0].Description,
-                //        //        Price = DatabaseResults[0].Price,
-                //        //        Active = DatabaseResults[0].Active,
-                //        //        Release_date = DatabaseResults[0].Release_date,
-                //        //        Brand = new()
-                //        //        {
-                //        //            ID = DatabaseResults[0].BrandID,
-                //        //            Brand = DatabaseResults[0].Brand
-                //        //        },
-                //        //        Categories = categories
-                //        //    };
-
-                //        //    return products;
-                //        //}
-
-                //        //return this.StatusCode(StatusCodes.Status404NotFound, "Product you searched for does not exist");
             }
             catch (Exception)
             {
@@ -291,53 +257,6 @@ namespace Vextech_API.Controllers
                         .ToList();
                     return list;
                 }
-
-                //        //Products = new();
-                //        //string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.Brand FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID;";
-                //        //var DatabaseResults = SqlDataAccess.LoadData<VProductModel>(sql);
-
-                //        //if (DatabaseResults.Count == 0)
-                //        //{
-                //        //    return this.StatusCode(StatusCodes.Status204NoContent, "We did not find any products in the database.");
-                //        //}
-
-                //        //foreach (var item in DatabaseResults)
-                //        //{
-                //        //    sql = $"SELECT product_categories.ProductID, product_categories.CategoryID, product_category_names.Subcategory, product_category_names.Category FROM product_categories INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE product_categories.ProductID = {item.ID};";
-                //        //    var CategoriesResult = SqlDataAccess.LoadData<VProductCategoriesModel>(sql);
-                //        //    categories = new();
-
-                //        //    foreach (var Databasecategory in CategoriesResult)
-                //        //    {
-                //        //        ProductCategoryNameModel category = new()
-                //        //        {
-                //        //            ID = Databasecategory.CategoryID,
-                //        //            Subcategory = Databasecategory.Subcategory,
-                //        //            Category = Databasecategory.Category
-                //        //        };
-                //        //        categories.Add(category);
-                //        //    }
-
-                //        //    ProductModel products = new()
-                //        //    {
-                //        //        ID = item.ID,
-                //        //        Name = item.Name,
-                //        //        Price = item.Price,
-                //        //        Active = item.Active,
-                //        //        Release_date = item.Release_date,
-                //        //        Brand = new()
-                //        //        {
-                //        //            ID = item.BrandID,
-                //        //            Brand = item.Brand
-                //        //        },
-                //        //        Categories = categories
-                //        //    };
-
-                //        //    Products.Add(products);
-                //        //}
-
-                //        //return Products;
-
             }
             catch (Exception)
             {

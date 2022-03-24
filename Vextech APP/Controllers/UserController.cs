@@ -9,7 +9,6 @@ namespace Vextech_APP.Controllers
         IEnumerable<LoginViewModel> login = null;
         IEnumerable<UserViewModel> user = null;
 
-        [HttpGet]
         public IActionResult Login()
         {
             return View();
@@ -52,7 +51,7 @@ namespace Vextech_APP.Controllers
             return View();
         }
         
-        [HttpGet]
+        [HttpPost]
         public IActionResult CreateUser()
         {
             return View();

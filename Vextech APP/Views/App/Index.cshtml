@@ -19,7 +19,7 @@
     <div class="row flex-row flex-nowrap overflow-auto" style="overflow-y:hidden">
     @foreach (var item in Model) {
         <div class="card col-2">
-            <a class="nav-link" asp-controller="App" asp-action="Contact">
+            <a class="nav-link" href="@Url.ActionLink("ProductDetails", "App", new { id = item.ID }, null )">
                 <img src="~/img/@item.Images[0].PictureName" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
             </a>
             <h1><a class="nav-link" asp-controller="App" asp-action="Contact">@Html.DisplayFor(modelItem => item.Name)</a></h1>
