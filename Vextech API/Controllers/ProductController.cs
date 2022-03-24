@@ -29,7 +29,8 @@ namespace Vextech_API.Controllers
                 string sql = "SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, " +
                     "products.BrandID, product_brand.ID, product_brand.Brand, " +
                     "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
-                    "product_category_names.Subcategory, product_category_names.Category " +
+                    "product_category_names.Subcategory, product_category_names.Category, " +
+                    "product_images.ProductID, product_images.PictureName " +
                     "FROM products " +
                     "INNER JOIN product_brand " +
                     "ON products.BrandID = product_brand.ID " +
@@ -37,6 +38,8 @@ namespace Vextech_API.Controllers
                     "ON products.ID = product_categories.ProductID " +
                     "INNER JOIN product_category_names " +
                     "ON product_categories.CategoryID = product_category_names.ID " +
+                    "INNER JOIN product_images " +
+                    "ON product_images.ProductID = products.ID " +
                     "WHERE products.Active = 1 " +
                     "ORDER BY products.ID ASC";
                 using (IDbConnection connection = new MySqlConnection(SqlDataAccess.GetConnectionString()))
@@ -44,9 +47,9 @@ namespace Vextech_API.Controllers
                     //a map over the products that has ben mapt  
                     var productmap = new Dictionary<int, ProductModel>();
                     //inserts ProductModel, ProductBrandModel, list<ProductCategoryNameModel> into list of ProductModel
-                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductModel>(
+                    var list = connection.Query<ProductModel, ProductBrandModel, ProductCategoryNameModel, ProductImageModel, ProductModel>(
                         sql,
-                        (product, productBrand, productCategoryName) =>
+                        (product, productBrand, productCategoryName, productImage) =>
                         {
 
                             ProductModel productEntiry;
@@ -60,9 +63,22 @@ namespace Vextech_API.Controllers
                             productEntiry.Categories.Add(productCategoryName);
                             //sets the brand of the product
                             productEntiry.Brand = productBrand;
+                            bool result = true;
+                            foreach (var item in productEntiry.Images)
+                            {
+                                if (item.PictureName == productImage.PictureName)
+                                {
+                                    result = false;
+                                }
+                            }
+
+                            if (result)
+                            {
+                                productEntiry.Images.Add(productImage);
+                            }
 
                             return productEntiry;
-                        }//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
+                        }, splitOn: "Id,ProductID"//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" IMPORTANT (If you plit on something one to many remember to have both in the select)!!!!
                         ).Distinct().ToList();
                     return list;
                 }
@@ -113,8 +129,9 @@ namespace Vextech_API.Controllers
 
                 //return Products;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                throw ex;
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }

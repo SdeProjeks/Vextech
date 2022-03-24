@@ -11,6 +11,7 @@ namespace Vextech_APP.ViewModels.ProductModels
         public int Active { get; set; } = 0;
         public decimal Price { get; set; }
         public DateTime? Release_date { get; set; }
-        public List<ProductCategoryNameModel> Categories { get; set; } = new List<ProductCategoryNameModel>();
+        public List<ProductCategoryNameModel> Categories { get; set; } = new();
+        public List<ProductImagesViewModel> Images { get; set; } = new();
     }
 }

@@ -16,14 +16,17 @@
 
 <h1>Newest products</h1>
 <div class="container">
-    <div class="row flex-row flex-nowrap overflow-scroll">
+    <div class="row flex-row flex-nowrap overflow-auto" style="overflow-y:hidden">
     @foreach (var item in Model) {
         <div class="card col-2">
             <a class="nav-link" asp-controller="App" asp-action="Contact">
-                <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+                <img src="~/img/@item.Images[0].PictureName" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
             </a>
             <h1><a class="nav-link" asp-controller="App" asp-action="Contact">@Html.DisplayFor(modelItem => item.Name)</a></h1>
-@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+                @if (item.Release_date != null)
+                {
+                    <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>
+                }
             <div class="mt-auto">
                 <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
                 <button>Add to Cart</button>
@@ -37,12 +40,15 @@
 
 <h1>Best rated products</h1>
 <div class="container">
-    <div class="row flex-row flex-nowrap overflow-scroll">
+    <div class="row flex-row flex-nowrap overflow-auto" style="overflow-y:hidden">
     @foreach (var item in Model) {
         <div class="card col-2">
-            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            <img src="~/img/@item.Images[0].PictureName" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
             <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
-@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+                @if (item.Release_date != null)
+                {
+                    <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>
+                }
             <div class="mt-auto">
                 <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
                 <button>Add to Cart</button>
@@ -56,12 +62,15 @@
 
 <h1>Products</h1>
 <div class="container">
-    <div class="row flex-row flex-nowrap overflow-scroll">
+    <div class="row flex-row flex-nowrap overflow-auto" style="overflow-y:hidden">
     @foreach (var item in Model) {
         <div class="card col-2">
-            <img src="~/img/VanGogh.jpg" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
+            <img src="~/img/@item.Images[0].PictureName" alt="@Html.DisplayFor(modelItem => item.Name)" style="width:100%">
             <h1>@Html.DisplayFor(modelItem => item.Name)</h1>
-@*          <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>*@
+                @if (item.Release_date != null)
+                {
+                    <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>
+                }
             <div class="mt-auto">
                 <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>
                 <button>Add to Cart</button>

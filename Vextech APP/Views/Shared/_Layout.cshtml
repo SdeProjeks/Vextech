@@ -39,7 +39,7 @@
 											<button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
 											@if (Context.Request.Cookies["firstname"] != null && Context.Request.Cookies["lastname"] != null)
 											{
-												@Context.Request.Cookies["firstname"] @Context.Request.Cookies["lastname"]
+												<a>@Context.Request.Cookies["firstname"] @Context.Request.Cookies["lastname"]</a>
 											}
 											</button>
 											<ul class="dropdown-menu navbar-Background navbar-Link-color-white" aria-labelledby="dropdownMenuButton1">
