@@ -7,6 +7,7 @@ namespace Vextech_APP.Controllers
     {
         HttpClient client = new();
         IEnumerable<LoginViewModel> login = null;
+        IEnumerable<UserViewModel> user = null;
 
         [HttpGet]
         public IActionResult Login()
@@ -55,6 +56,84 @@ namespace Vextech_APP.Controllers
         public IActionResult CreateUser()
         {
             return View();
+        }
+
+        [HttpGet("session:string")]
+        public IActionResult UserProfile(string session)
+        {
+            string apiurl = ConnectionController.getConnectionString();
+
+            // Sets the url
+            client.BaseAddress = new Uri(apiurl + "User/");
+
+            // Contacts the userlogin get endpoint and send email and password with:
+            var responseTask = client.GetAsync($"GetUserFromSession?session={session}");
+            responseTask.Wait();
+
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                var readtask = result.Content.ReadFromJsonAsync<UserViewModel>();
+                readtask.Wait();
+
+                return View(readtask.Result);
+            }
+            else
+            {
+                user = Enumerable.Empty<UserViewModel>();
+                ModelState.AddModelError(string.Empty, "Login failed");
+            }
+
+            return View(user);
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            string apiurl = ConnectionController.getConnectionString();
+
+            // Sets the url
+            client.BaseAddress = new Uri(apiurl + "User/");
+            // Get session from cookies
+            HttpContext.Request.Cookies.TryGetValue("Session", out string session);
+            // Contacts the DeleteUserSession endpoint.
+            var responseTask = client.DeleteAsync($"DeleteUserSession?session={session}");
+            responseTask.Wait();
+
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                HttpContext.Response.Cookies.Delete("Session");
+                HttpContext.Response.Cookies.Delete("firstname");
+                HttpContext.Response.Cookies.Delete("lastname");
+            }
+            return RedirectToAction("index", "app");
+        }
+
+        [HttpGet]
+        public IActionResult UserDelete()
+        {
+            string apiurl = ConnectionController.getConnectionString();
+
+            // Sets the url
+            client.BaseAddress = new Uri(apiurl + "User/");
+            // Get session from cookies
+            HttpContext.Request.Cookies.TryGetValue("Session", out string session);
+            // Contacts the userdelete endpoint.
+            var responseTask = client.DeleteAsync($"DeleteUser?session={session}");
+            responseTask.Wait();
+
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                HttpContext.Response.Cookies.Delete("Session");
+                HttpContext.Response.Cookies.Delete("firstname");
+                HttpContext.Response.Cookies.Delete("lastname");
+
+                return RedirectToAction("index","app");
+            }
+
+            return RedirectToAction("UserProfile", new { session = session });
         }
     }
 }

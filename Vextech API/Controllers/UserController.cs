@@ -194,7 +194,7 @@ namespace Vextech_API.Controllers
                     " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country" +
                     " FROM users INNER JOIN roles ON users.RoleID = roles.ID INNER JOIN addresses ON users.AddressID = addresses.ID" +
                     " INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID" +
-                    $"INNER JOIN user_sessions ON user_sessions.UserID = users.ID WHERE user_sessions.ID = {session};";
+                    $" INNER JOIN user_sessions ON user_sessions.UserID = users.ID WHERE user_sessions.ID='{session}';";
                 var DatabaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
 
                 foreach (var user in DatabaseResult)
@@ -398,7 +398,44 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status404NotFound, "User not found or invalid data");
             }
+        }
 
+        [HttpDelete]
+        public ActionResult DeleteUserSession(string session)
+        {
+            try
+            {
+                // Deletes the session
+                string sql = $"DELETE FROM user_sessions WHERE user_sessions.ID='{session}';";
+                SqlDataAccess.DeleteData(sql);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "An error occoured and the user was not deleted.");
+            }
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteUser(string session)
+        {
+            try
+            {
+                // Deletes a user where the userID matches the session parsed in.
+                string sql = $"DELETE FROM users WHERE users.ID=(SELECT user_sessions.UserID FROM user_sessions WHERE user_sessions.ID='{session}');";
+                SqlDataAccess.DeleteData(sql);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "An error occoured and the user was not deleted.");
+            }
         }
     }
 }
