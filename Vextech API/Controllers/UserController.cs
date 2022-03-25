@@ -7,6 +7,7 @@ using System.Reflection;
 using Vextech_API.Controllers;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Vextech_API.Controllers
 {
@@ -180,61 +181,139 @@ namespace Vextech_API.Controllers
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
-        
-        [HttpPost]
-        public ActionResult<UserModel> Userlogin(string email, string password, string session = "null")
+
+        [HttpGet]
+        public ActionResult<UserModel> GetUserFromSession(string session)
+        {
+            try
+            {
+                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
+                Users = new();
+                string sql = "SELECT users.ID, users.Email, users.Firstname, users.Lastname, users.Password, users.VatID," +
+                    " users.RoleID, roles.Name, users.AddressID, addresses.Address, addresses.PostNumberID, PostNumber, City, post_numbers.CountryID, countries.Country" +
+                    " FROM users INNER JOIN roles ON users.RoleID = roles.ID INNER JOIN addresses ON users.AddressID = addresses.ID" +
+                    " INNER JOIN post_numbers ON addresses.PostNumberID = post_numbers.ID INNER JOIN countries ON post_numbers.CountryID = countries.ID" +
+                    $" INNER JOIN user_sessions ON user_sessions.UserID = users.ID WHERE user_sessions.ID='{session}';";
+                var DatabaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+
+                foreach (var user in DatabaseResult)
+                {
+                    sql = $"SELECT user_phonenumbers.UserID, user_phonenumbers.MobileCategoryID, user_phonenumbers.PhoneNumber, mobile_category.Name FROM user_phonenumbers INNER JOIN mobile_category ON user_phonenumbers.MobileCategoryID = mobile_category.ID WHERE user_phonenumbers.UserID = {user.ID}";
+                    var PhonenumberResult = SqlDataAccess.LoadData<VUserMobileModel>(sql);
+                    phonenumbers = new();
+
+                    foreach (var databasephonenumbers in PhonenumberResult)
+                    {
+                        UserMobileModel phonenumber = new()
+                        {
+                            mobileCategory = new MobileCategoryModel()
+                            {
+                                ID = databasephonenumbers.MobileCategoryID,
+                                Name = databasephonenumbers.Name
+                            },
+                            PhoneNumber = databasephonenumbers.PhoneNumber
+                        };
+                        phonenumbers.Add(phonenumber);
+                    }
+
+                    UserModel users = new()
+                    {
+                        ID = user.ID,
+                        Role = new()
+                        {
+                            ID = user.RoleID,
+                            Name = user.Name,
+                        },
+                        Address = new()
+                        {
+                            ID = user.AddressID,
+                            Address = user.Address,
+                            PostNumberID = new()
+                            {
+                                ID = user.PostNumberID,
+                                PostNumber = user.PostNumber,
+                                City = user.City,
+                                CountryID = new()
+                                {
+                                    ID = user.CountryID,
+                                    Country = user.Country
+                                },
+                            },
+                        },
+                        Email = user.Email,
+                        Firstname = user.Firstname,
+                        Lastname = user.Lastname,
+                        Password = user.Password,
+                        VatID = user.VatID,
+                        PhoneNumbers = phonenumbers
+                    };
+                    Users.Add(users);
+                }
+
+                if (Users.Count == 0)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, "user not found");
+                }
+                return Users[0];
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult<UserModel> Userlogin(string email, string password)
         {
             try
             {
                 Users = new();
-                if (session == "null")
+                string sql;
+
+                // QUICK FIX replace all spaces with + because fuck do i know.
+                sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email='{email}' AND Password='{Regex.Replace(password, @"\s+", "+")}'";
+                var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
+                foreach (var user in databaseResult)
                 {
-                    string sql;
-                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
-                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
-                    foreach (var user in databaseResult)
+                    UserModel users = new()
                     {
-                        UserModel users = new()
-                        {
-                            ID = user.ID,
-                            Firstname = user.Firstname,
-                            Lastname = user.Lastname
-                        };
-                        Users.Add(users);
-                    }
-                    if (Users.Count == 0)
-                    {
-                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
-                    }
-
-                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
-
-                    return Users[0];
+                        ID = user.ID,
+                        Firstname = user.Firstname,
+                        Lastname = user.Lastname
+                    };
+                    Users.Add(users);
                 }
-                else
+                if (Users.Count == 0)
                 {
-                    string sql;
-                    sql = $"SELECT ID, Firstname, Lastname FROM users WHERE Email = '{email}' AND Password = '{password}'";
-                    var databaseResult = SqlDataAccess.LoadData<VUserModel>(sql);
-                    foreach (var User in databaseResult)
-                    {
-                        UserModel users = new()
-                        {
-                            ID = User.ID,
-                            Firstname = User.Firstname,
-                            Lastname = User.Lastname
-                        };
-                        Users.Add(users);
-                    }
-                    if (Users.Count == 0)
-                    {
-                        return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
-                    }
-
-                    Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID, session);
-
-                    return Users[0];
+                    return this.StatusCode(StatusCodes.Status404NotFound, "Password or Email was not found");
                 }
+
+                Users[0].Session = UserSessionController.UserLoginSessionHandler(Users[0].ID);
+
+                return Users[0];
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult<bool> UserHasPermission(string permission, string session)
+        {
+            try
+            {
+                var result = false;
+                var permissionResult = UserSessionController.SessionPermissionGrant(permission, session);
+
+                if (permissionResult == "Granted") result = true;
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -319,7 +398,44 @@ namespace Vextech_API.Controllers
 
                 return this.StatusCode(StatusCodes.Status404NotFound, "User not found or invalid data");
             }
+        }
 
+        [HttpDelete]
+        public ActionResult DeleteUserSession(string session)
+        {
+            try
+            {
+                // Deletes the session
+                string sql = $"DELETE FROM user_sessions WHERE user_sessions.ID='{session}';";
+                SqlDataAccess.DeleteData(sql);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "An error occoured and the user was not deleted.");
+            }
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteUser(string session)
+        {
+            try
+            {
+                // Deletes a user where the userID matches the session parsed in.
+                string sql = $"DELETE FROM users WHERE users.ID=(SELECT user_sessions.UserID FROM user_sessions WHERE user_sessions.ID='{session}');";
+                SqlDataAccess.DeleteData(sql);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "An error occoured and the user was not deleted.");
+            }
         }
     }
 }

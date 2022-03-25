@@ -112,7 +112,7 @@ namespace Vextech_API.Controllers
             }
         }
         [HttpGet("{productID:int}")]
-        public ActionResult<List<ProductReviewModel>> GetAllReviewsToOneProduct (int productID)
+        public ActionResult<List<ProductReviewModel>> GetProductReviews (int productID)
         {
             try
             {
@@ -128,18 +128,6 @@ namespace Vextech_API.Controllers
                     ProductReviewModel reviewing = new()
                     {
                         ID = Review.ID,
-                        Product = new()
-                        { 
-                            ID = Review.ProductID,
-                            Name = Review.Name,
-                            Price = Review.Price,
-                            Description = Review.Decription,
-                            Brand = new()
-                            {
-                                ID = Review.BrandID,
-                                Brand = Review.Brand
-                            },
-                        },
                         User = new()
                         {
                             ID = Review.UserID,

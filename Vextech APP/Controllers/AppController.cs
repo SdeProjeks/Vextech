@@ -87,5 +87,53 @@ namespace Vextech_APP.Controllers
 
             return View();
         }
+
+        public IActionResult ProductDetails(int id)
+        {
+            string apiurl = ConnectionController.getConnectionString();
+
+            // Sets the url
+            client.BaseAddress = new Uri(apiurl + "Product/");
+            // Contacts an api endpoint inside of products then waits for it to finish:
+            var responseTask = client.GetAsync($"GetProduct/{id}");
+            responseTask.Wait();
+
+            // Checks the result of the API call and handles it.
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                var readtask = result.Content.ReadFromJsonAsync<ProductViewModel>();
+                readtask.Wait();
+
+                return View(readtask.Result);
+            }
+            ProductViewModel product = new();
+
+            return View(product);
+        }
+
+        public IActionResult ProductReviews(int productid)
+        {
+            string apiurl = ConnectionController.getConnectionString();
+
+            // Sets the url
+            client.BaseAddress = new Uri(apiurl + "ProductReview/");
+            // Contacts an api endpoind GetProductReviews to get all of a products reviews:
+            var responseTask = client.GetAsync($"GetProductReviews/{productid}");
+            responseTask.Wait();
+
+            // Checks the result of the API call and handles it.
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                var readtask = result.Content.ReadFromJsonAsync<IList<ProductViewModel>>();
+                readtask.Wait();
+
+                return View(readtask.Result);
+            }
+            ProductViewModel product = new();
+
+            return View(product);
+        }
     }
 }
