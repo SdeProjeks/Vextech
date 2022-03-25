@@ -4,6 +4,7 @@ using Vextech_API.Models;
 using Vextech_API.DataAccess;
 using System.Reflection;
 using System.Net.Http;
+using Dapper;
 
 namespace Vextech_API.Controllers
 {
@@ -18,23 +19,8 @@ namespace Vextech_API.Controllers
                 // Checks if an oldsession has been parsed
                 if (oldsession != "null")
                 {
-                    // Checks if the session exists
-                    var oldsessionresult = SessionExist(oldsession);
-                    DateTime now = DateTime.UtcNow;
-
-                    // Checks if the expire date is lower than current datetime if so just update the expiretime with same sesion.
-                    if (oldsessionresult.Expires >= now)
-                    {
-                        updateSession(oldsession);
-
-                        return "Session has been updated.";
-                    }
-                    else // If the session date has expired logout user
-                    {
-                        deleteOldSession(oldsession);
-
-                        return "Session has expired.";
-                    }
+                    // Goes through the UserAPISessionHandler where it either updates the expire time or deletes the session 
+                    return UserAPISessionHandler(oldsession);
                 }
                 else
                 {
@@ -89,7 +75,7 @@ namespace Vextech_API.Controllers
             }
             else
             {
-                throw new Exception("Bad request more than one result was gotten sql injection?");
+                throw new ArgumentException("Bad request more than one result was gotten sql injection?","Param");
             }
         }
 
@@ -101,7 +87,7 @@ namespace Vextech_API.Controllers
 
             if (result.Count == 0)
             {
-                throw new Exception("Session was not found.");
+                throw new ArgumentException("Session was not found","Session");
             }
 
             return result[0];
