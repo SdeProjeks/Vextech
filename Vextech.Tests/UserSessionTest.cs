@@ -18,6 +18,7 @@ namespace Vextech.Tests
         {
             Assert.Throws<ArgumentException>(Session, () => UserSessionController.SessionExist(session));
         }
+
         [Theory]
         [InlineData("comments_create", "jidaojdaeiodjaeiopdjaeiopdjaeiojdiaeodjaeiodjaeiodjaeiodjaeiodjaeiodjaeiopdjaeiodjiaeojdioaejdeaiojd")]
         public void SessionPermissionGrant_Granted(string permission, string oldsession)
@@ -26,7 +27,7 @@ namespace Vextech.Tests
             string expected = "Granted";
 
             //Act
-            string actual = UserSessionController.SessionPermissionGrant(permission,oldsession);
+            string actual = UserSessionController.SessionPermissionGrant(permission, oldsession);
 
             // Assert
             Assert.Equal(expected, actual);
