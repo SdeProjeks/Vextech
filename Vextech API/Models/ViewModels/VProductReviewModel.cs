@@ -30,5 +30,6 @@ namespace Vextech_API.Models.ViewModels
         [Required]
         [RegularExpression(@"^[0-5]{1,1}")]
         public int Rating { get; set; }
+        public DateTime Date { get; set; }
     }
 }
