@@ -2,7 +2,22 @@
 
 @{
     ViewData["Title"] = Model.Name;
+    string session = Context.Request.Cookies["session"];
 }
+
+@{
+    double rating = 0;
+    if (Model.Reviews.Count() != 0)
+    {
+        List<int> arr = new();
+        foreach (var item in Model.Reviews)
+        {
+            arr.Add(item.Rating);
+        }
+        rating = Queryable.Average(arr.AsQueryable());
+    }
+}
+
 <header>
     <link href="~/css/index.css" rel="stylesheet" />
 </header>
@@ -50,6 +65,9 @@
             </dd>
             }
             <dt class = "col-sm-3">
+                Rating: @rating
+            </dt>
+            <dt class = "col-sm-3">
                 @Html.DisplayNameFor(model => model.Description)
             </dt>
             <dd class = "col-sm-10">
@@ -64,4 +82,45 @@
 </div>
 
 <div>
+    <hr />
+
+
+    @if (session != null) {
+        @if (!Vextech_APP.Permissions.HasUserCommented(Model.ID, session))
+        {
+            Vextech_APP.ViewModels.ProductModels.ProductReviewViewModel review = new() { ProductID = Model.ID };
+            @Html.Partial("_PostComment", review)
+        } else
+        {
+            <p>You have already commented on this product.</p>
+        }
+    } else {
+        <p>Must be logged in to post a comment.</p>
+    }
+
+
+    <hr />
+    <h2>Reviews (@Model.Reviews.Count())</h2>
+
+    @foreach (var item in Model.Reviews)
+    {
+        <div>
+            <b>@item.User.Firstname @item.User.Lastname: @item.Date</b>
+            <p>@item.Comment</p>
+            <div>
+                @if (Context.Request.Cookies["session"] != null)
+                {
+                    if (Vextech_APP.Permissions.PermissionCheck("comments_update_all", session) || Vextech_APP.Permissions.PermissionCheck("comments_update_own", session) && Vextech_APP.Permissions.UsersComment(item.ID, session))
+                    {
+                        @Html.ActionLink("Edit","EditReview","User", new { commentID = @item.ID }) <span> </span>
+                    }   
+                    if (Vextech_APP.Permissions.PermissionCheck("comments_delete_all", session) || Vextech_APP.Permissions.PermissionCheck("comments_delete_own", session) && Vextech_APP.Permissions.UsersComment(item.ID, session))
+                    {
+                        @Html.ActionLink("Delete", "CommentDelete", new { /* id = Model.PrimaryKey */ });
+                    }
+                }
+            </div>
+        </div>
+    }
+    <br />
 </div>

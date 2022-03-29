@@ -30,11 +30,6 @@ namespace Vextech_API.Controllers
                     ProductReviewModel remaping = new()
                     {
                         ID = Review.ID,
-                        Product = new()
-                        {
-                            Name = Review.Name,
-                            Price = Review.Price
-                        },
                         User = new()
                         {
                             Firstname = Review.Firstname,
@@ -60,7 +55,7 @@ namespace Vextech_API.Controllers
             }
         }
         [HttpGet("{id:int}")]
-        public ActionResult<List<ProductReviewModel>> GetOneReview(int id)
+        public ActionResult<ProductReviewModel> GetOneReview(int id)
         {
             try
             {
@@ -68,7 +63,7 @@ namespace Vextech_API.Controllers
 
                 productReviews = new();
                 string sql;
-                sql = $"SELECT product_reviews.ID, products.Name, products.Price, products.Description, product_brand.Brand, users.Firstname, users.Lastname, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON product_brand.ID = products.BrandID WHERE product_reviews.ID = {id};";
+                sql = $"SELECT product_reviews.ID, product_reviews.ProductID, users.Firstname, users.Lastname, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON product_brand.ID = products.BrandID WHERE product_reviews.ID = {id};";
 
                 var result = SqlDataAccess.LoadData<VProductReviewModel>(sql);
                 foreach (var Review in result)
@@ -76,17 +71,7 @@ namespace Vextech_API.Controllers
                     ProductReviewModel reviewing = new()
                     {
                         ID = Review.ID,
-                        Product = new()
-                        {
-                            Name = Review.Name,
-                            Price = Review.Price,
-                            Description = Review.Decription,
-                            Brand = new()
-                            {
-                                ID = Review.BrandID,
-                                Brand = Review.Brand
-                            },
-                        },
+                        ProductID = Review.ProductID,
                         User = new()
                         {
                             Firstname = Review.Firstname,
@@ -101,7 +86,7 @@ namespace Vextech_API.Controllers
                 {
                     return this.StatusCode(StatusCodes.Status404NotFound, "Could not find the review");
                 }
-                return productReviews;
+                return productReviews[0];
                 
             }
             catch (Exception ex)
@@ -120,7 +105,7 @@ namespace Vextech_API.Controllers
 
                 productReviews = new();
                 string sql;
-                sql = $"SELECT product_reviews.ID, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date, product_reviews.ProductID, products.Name, products.Price, products.Description, products.BrandID, product_brand.Brand, product_reviews.UserID, users.Firstname, users.Lastname FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {productID};";
+                sql = $"SELECT product_reviews.ID, product_reviews.`Comment`, product_reviews.Rating, product_reviews.Date, product_reviews.ProductID, products.Name, products.Price, products.Description, products.BrandID, product_brand.Brand, product_reviews.UserID, users.Firstname, users.Lastname FROM product_reviews INNER JOIN users ON product_reviews.UserID = users.ID INNER JOIN products ON product_reviews.ProductID = products.ID INNER JOIN product_brand ON products.BrandID = product_brand.ID WHERE products.ID = {productID} ORDER BY product_reviews.Date DESC;";
 
                 var result = SqlDataAccess.LoadData<VProductReviewModel>(sql);
                 foreach (var Review in result)
@@ -135,7 +120,8 @@ namespace Vextech_API.Controllers
                             Lastname = Review.Lastname,
                         },
                         Comment = Review.comment,
-                        Rating = Review.Rating
+                        Rating = Review.Rating,
+                        Date = Review.Date
                     };
                     productReviews.Add(reviewing);
                 }
@@ -153,27 +139,81 @@ namespace Vextech_API.Controllers
             }
         }
 
-        [HttpPost]
-        public ActionResult CreateProductReview(VProductReviewModel createProductReview)
+        [HttpGet]
+        public ActionResult<bool> CheckUsersComment(ulong commentID, string session)
         {
             try
             {
-                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+                return UserSessionController.CheckIfUsersComment(commentID, session);
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
 
-                //VProductReviewModel data = new()
-                //{
-                //    ProductID = ProductID,
-                //    UserID = UserID,
-                //    comment = Comment,
-                //    Rating = Rating,
-                //};
+                return this.StatusCode(StatusCodes.Status404NotFound, "could not delete the review because we could not find it review");
+            }
+        }
 
-                string sql;
-                sql = @"INSERT INTO product_reviews (ProductID,UserID, Comment, Rating) VALUES (@ProductID, @UserID, @comment, @Rating);";
+        [HttpGet]
+        public ActionResult<bool> HasUsersCommented(int productID, string session)
+        {
+            try
+            {
+                ulong userid = UserSessionController.getUserIDFromSession(session);
 
-                var result = SqlDataAccess.SaveData<VProductReviewModel>(sql, createProductReview);
+                string sql = $"SELECT UserID FROM product_reviews WHERE ProductID={productID} && UserID={userid}";
+                var result = SqlDataAccess.LoadData<ProductReviewModel>(sql);
 
-                return Ok("Review has been added");
+                bool returnedBool = false;
+
+                if (result.Count != 0) returnedBool = true;
+
+                return returnedBool;
+            }
+            catch (Exception ex)
+            {
+                LogsController.CreateExceptionLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com", ex);
+
+                return this.StatusCode(StatusCodes.Status404NotFound, "could not delete the review because we could not find it review");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CreateProductReview(string comment, int rating, int productID, string session)
+        {
+            try
+            {
+                ulong userid = UserSessionController.getUserIDFromSession(session);
+
+                string sql = $"SELECT UserID FROM product_reviews WHERE ProductID={productID} && UserID={userid}";
+                var result = SqlDataAccess.LoadData<ProductReviewModel>(sql);
+
+                if (result.Count != 0)
+                {
+                    return this.StatusCode(StatusCodes.Status403Forbidden, "You have already created a comment for this product.");
+                }
+
+                if (UserSessionController.SessionPermissionGrant("comments_create",session) == "Granted")
+                {
+                    LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+
+                    ProductReviewModel data = new()
+                    {
+                        ProductID = productID,
+                        UserID = 1,
+                        Comment = comment,
+                        Rating = rating,
+                    };
+
+                    sql = @"INSERT INTO product_reviews (ProductID,UserID,Comment,Rating) VALUES (@ProductID, @UserID, @comment, @Rating);";
+
+                    SqlDataAccess.SaveData<ProductReviewModel>(sql, data);
+
+                    return Ok("Review has been added");
+                }
+
+                return this.StatusCode(StatusCodes.Status403Forbidden, "You do not have access to create comments");
+
             }
             catch (Exception ex)
             {
@@ -184,18 +224,25 @@ namespace Vextech_API.Controllers
         }
 
         [HttpPut]
-        public ActionResult UpdateProductReview(VProductReviewModel updateProductReview)
+        public ActionResult UpdateProductReview(ulong ID, string comment, int rating, string session)
         {
             try
             {
-                LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
+                if (UserSessionController.SessionPermissionGrant("comments_update_own", session) == "Granted" && UserSessionController.CheckIfUsersComment(ID,session) || UserSessionController.SessionPermissionGrant("comments_update_all", session) == "Granted")
+                {
+                    LogsController.CreateCalledLog(MethodBase.GetCurrentMethod().Name, "Placeholser@gmail.com");
 
-                string sql;
-                sql = $"UDPATE product_reviews SET Comment='{updateProductReview.comment}', Rating = {updateProductReview.Rating} WHERE ID = {updateProductReview.ID}";
-                
-                var result = SqlDataAccess.UpdateData(sql);
+                    string date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
-                return Ok("Updated the review succesfully");
+                    string sql;
+                    sql = $"UPDATE product_reviews SET Comment='{comment}',Rating={rating},Date='{date}' WHERE ID = {ID};";
+
+                    var result = SqlDataAccess.UpdateData(sql);
+
+                    return Ok("Updated the review succesfully");
+                }
+
+                return this.StatusCode(StatusCodes.Status403Forbidden, "You do not have access to update this comment");
             }
             catch (Exception ex)
             {
@@ -206,7 +253,7 @@ namespace Vextech_API.Controllers
         }
 
         [HttpDelete]
-        public ActionResult DeleteOneReview(int id, int userID)
+        public ActionResult DeleteOneReview(ulong ID, int userID, string session)
         {
             try
             {
@@ -215,18 +262,15 @@ namespace Vextech_API.Controllers
                 string sql;
 
                 // When checking for permissions
-                if (false)
+                if (UserSessionController.SessionPermissionGrant("comments_delete_own", session) == "Granted" && UserSessionController.CheckIfUsersComment(ID, session) || UserSessionController.SessionPermissionGrant("comments_delete_all", session) == "Granted")
                 {
-
-                }
-                else
-                {
-                    sql = $"DELETE FROM product_reviews WHERE ID = {id} AND UserID = {userID}";
+                    sql = $"DELETE FROM product_reviews WHERE ID = {ID} AND UserID = {userID}";
                     var result = SqlDataAccess.DeleteData(sql);
 
                     return Ok("Deleted your review succesfully");
                 }
 
+                return this.StatusCode(StatusCodes.Status403Forbidden, "You do not have access to delete this comment");
             }
             catch (Exception ex)
             {

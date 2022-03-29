@@ -140,5 +140,30 @@ namespace Vextech_API.Controllers
 
             var sessionUpdateResult = SqlDataAccess.UpdateData(sqlstring);
         }
+
+        public static ulong getUserIDFromSession(string session)
+        {
+
+            string sql = $"SELECT UserID FROM user_sessions WHERE ID='{session}';";
+            var result = SqlDataAccess.LoadData<UserSessionModel>(sql);
+
+            if (result.Count != 0)
+            {
+                return result[0].UserID;
+            }
+
+            throw new Exception("Session passed was invalid no users are connected to it.");
+        }
+
+        public static bool CheckIfUsersComment(ulong commentID, string session)
+        {
+            bool result = false;
+            string sql = $"SELECT product_reviews.ID FROM user_sessions INNER JOIN users ON user_sessions.UserID = users.ID INNER JOIN product_reviews ON product_reviews.UserID = users.ID WHERE user_sessions.ID='{session}' AND product_reviews.ID={commentID};";
+            var result2 = SqlDataAccess.LoadData<ProductReviewModel>(sql);
+
+            if (result2.Count != 0) result = true;
+
+            return result;
+        }
     }
 }

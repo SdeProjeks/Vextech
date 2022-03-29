@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Vextech_APP.ViewModels.UserModels;
+using Vextech_APP.ViewModels.ProductModels;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace Vextech_APP.Controllers
 {
@@ -134,5 +137,112 @@ namespace Vextech_APP.Controllers
 
             return RedirectToAction("UserProfile", new { session = session });
         }
+
+        [HttpGet]
+        public IActionResult EditReview(ulong commentID)
+        {
+            string session = HttpContext.Request.Cookies["Session"];
+
+            // Checks if the user session does have permission to or owns the comment that is about to be added if this fails then it will redirect to the home page.
+            if (Vextech_APP.Permissions.PermissionCheck("comments_update_all", session) || Vextech_APP.Permissions.PermissionCheck("comments_update_own", session) && Vextech_APP.Permissions.UsersComment(commentID, session))
+            {
+                string apiurl = ConnectionController.getConnectionString();
+
+                // Sets the url
+                client.BaseAddress = new Uri(apiurl + "ProductReview/");
+
+                // Contacts the userlogin get endpoint and send email and password with:
+                var responseTask = client.GetAsync($"GetOneReview/{commentID}");
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    var readtask = result.Content.ReadFromJsonAsync<ProductReviewViewModel>();
+                    readtask.Wait();
+
+                    return View(readtask.Result);
+                }
+                else
+                {
+                    ProductReviewViewModel empty = new();
+                    ModelState.AddModelError(string.Empty, "Could not get the review");
+                    return View(empty);
+                }
+            }
+
+            return RedirectToAction("Index","App");
+        }
+
+        [HttpPost]
+        public IActionResult EditReview(ProductReviewViewModel model)
+        {
+            string session = HttpContext.Request.Cookies["Session"];
+
+            // Checks if the user session does have permission to or owns the comment that is about to be added if this fails then it will redirect to the home page.
+            if (Vextech_APP.Permissions.PermissionCheck("comments_update_all", session) || Vextech_APP.Permissions.PermissionCheck("comments_update_own", session) && Vextech_APP.Permissions.UsersComment(model.ID, session))
+            {
+                string apiurl = ConnectionController.getConnectionString();
+
+                // Sets the url
+                client.BaseAddress = new Uri(apiurl + "ProductReview/");
+
+                var jsonContent = JsonConvert.SerializeObject(new { ID = model.ID, comment = model.Comment, Rating = model.Rating, session = session });
+                var content = new StringContent(jsonContent.ToString(), Encoding.UTF8, "application/json");
+
+                // Contacts the userlogin get endpoint and send email and password with:
+                var responseTask = client.PutAsync($"UpdateProductReview?ID={model.ID}&comment={model.Comment}&rating={model.Rating}&session={session}", content);
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("ProductDetails", "App", new { id = model.ProductID });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Could not update the comment.");
+                    return View(model);
+                }
+            }
+
+            return RedirectToAction("Index","App");
+        }
     }
+
+    //[HttpGet]
+    //public IActionResult DeleteReview(ulong commentID, int productID)
+    //{
+    //    string session = HttpContext.Request.Cookies["Session"];
+
+    //    // Checks if the user session does have permission to or owns the comment that is about to be added if this fails then it will redirect to the home page.
+    //    if (Vextech_APP.Permissions.PermissionCheck("comments_delete_all", session) || Vextech_APP.Permissions.PermissionCheck("comments_delete_own", session) && Vextech_APP.Permissions.UsersComment(commentID, session))
+    //    {
+    //        string apiurl = ConnectionController.getConnectionString();
+
+    //        // Sets the url
+    //        client.BaseAddress = new Uri(apiurl + "ProductReview/");
+
+    //        // Contacts the userlogin get endpoint and send email and password with:
+    //        var responseTask = client.GetAsync($"GetOneReview/{commentID}");
+    //        responseTask.Wait();
+
+    //        var result = responseTask.Result;
+    //        if (result.IsSuccessStatusCode)
+    //        {
+    //            var readtask = result.Content.ReadFromJsonAsync<ProductReviewViewModel>();
+    //            readtask.Wait();
+
+    //            return View(readtask.Result);
+    //        }
+    //        else
+    //        {
+    //            ProductReviewViewModel empty = new();
+    //            ModelState.AddModelError(string.Empty, "Could not get the review");
+    //            return View(empty);
+    //        }
+    //    }
+
+    //    return RedirectToAction("Index", "App");
+    //}
 }

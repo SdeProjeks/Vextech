@@ -13,5 +13,6 @@ namespace Vextech_APP.ViewModels.ProductModels
         public DateTime? Release_date { get; set; }
         public List<ProductCategoryNameModel> Categories { get; set; } = new();
         public List<ProductImagesViewModel> Images { get; set; } = new();
+        public List<ProductReviewViewModel> Reviews { get; set; } = new();
     }
 }

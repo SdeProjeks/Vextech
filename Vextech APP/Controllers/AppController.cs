@@ -88,6 +88,7 @@ namespace Vextech_APP.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult ProductDetails(int id)
         {
             string apiurl = ConnectionController.getConnectionString();
@@ -105,6 +106,29 @@ namespace Vextech_APP.Controllers
                 var readtask = result.Content.ReadFromJsonAsync<ProductViewModel>();
                 readtask.Wait();
 
+                HttpClient client2 = new();
+                // Sets the url
+                client2.BaseAddress = new Uri(apiurl + "ProductReview/");
+                // Contacts an api endpoint inside of products then waits for it to finish:
+                var responseTask2 = client2.GetAsync($"GetProductReviews/{id}");
+                responseTask2.Wait();
+
+                if (responseTask2.Result.IsSuccessStatusCode)
+                {
+                    if (responseTask2.Result.ReasonPhrase == "OK")
+                    {
+                        var reviews = responseTask2.Result.Content.ReadFromJsonAsync<List<ProductReviewViewModel>>();
+                        reviews.Wait();
+
+                        readtask.Result.Reviews = reviews.Result;
+                    }
+                    else
+                    {
+                        readtask.Result.Reviews = new();
+                    }
+
+                }
+
                 return View(readtask.Result);
             }
             ProductViewModel product = new();
@@ -112,28 +136,28 @@ namespace Vextech_APP.Controllers
             return View(product);
         }
 
-        public IActionResult ProductReviews(int productid)
+        [HttpPost]
+        public IActionResult ProductDetails(ProductReviewViewModel model)
         {
+            string session = HttpContext.Request.Cookies["Session"];
+            if (session != null) { }
             string apiurl = ConnectionController.getConnectionString();
+            var jsonContent = JsonConvert.SerializeObject(new { comment = model.Comment, rating = model.Rating, productID = model.ProductID, session = session });
+            var content = new StringContent(jsonContent.ToString(), Encoding.UTF8, "application/json");
 
-            // Sets the url
-            client.BaseAddress = new Uri(apiurl + "ProductReview/");
-            // Contacts an api endpoind GetProductReviews to get all of a products reviews:
-            var responseTask = client.GetAsync($"GetProductReviews/{productid}");
+            // Sets the uri
+            Uri uri = new(apiurl + $"ProductReview/CreateProductReview?comment={model.Comment}&rating={model.Rating}&productID={model.ProductID}&session={session}");
+            // Contacts an api endpoint inside of contacts then waits for it to finish:
+            var responseTask = client.PostAsync(uri, content);
             responseTask.Wait();
 
-            // Checks the result of the API call and handles it.
             var result = responseTask.Result;
             if (result.IsSuccessStatusCode)
             {
-                var readtask = result.Content.ReadFromJsonAsync<IList<ProductViewModel>>();
-                readtask.Wait();
-
-                return View(readtask.Result);
+                return RedirectToAction("ProductDetails", "App", new { id = model.ProductID });
             }
-            ProductViewModel product = new();
 
-            return View(product);
+            return RedirectToAction("ProductDetails","App", new { id = model.ProductID });
         }
     }
 }

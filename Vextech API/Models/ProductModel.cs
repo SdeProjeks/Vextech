@@ -12,7 +12,8 @@ namespace Vextech_API.Models
         public int Active { get; set; } = 0;
         public decimal Price { get; set; }
         public DateTime? Release_date { get; set; }
-        public List<ProductCategoryNameModel> Categories { get; set; } = new List<ProductCategoryNameModel>();
-        public List<ProductImageModel> Images { get; set; } = new List<ProductImageModel>();
+        public List<ProductCategoryNameModel> Categories { get; set; } = new();
+        public List<ProductImageModel> Images { get; set; } = new();
+        public List<ProductReviewModel> Reviews { get; set; } = new();
     }
 }

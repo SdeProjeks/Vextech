@@ -144,6 +144,7 @@ namespace Vextech_API.Controllers
             try
             {
                 //"SELECT products.ID, products.Name, products.Active, products.Price, products.Release_date, products.BrandID, product_brand.ID, product_brand.Brand, product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, product_category_names.Subcategory, product_category_names.Category FROM products INNER JOIN product_brand ON products.BrandID = product_brand.ID INNER JOIN product_categories ON products.ID = product_categories.ProductID INNER JOIN product_category_names ON product_categories.CategoryID = product_category_names.ID WHERE products.Active = 1 AND  products.ID = {id}; "
+                // Remember to have the correct select order that matches the spliton
                 string sql = "SELECT products.ID, products.Name, products.Active, products.Description, products.Price, products.Release_date, " +
                     "products.BrandID, product_brand.ID, product_brand.Brand, " +
                     "product_categories.ProductID, product_categories.CategoryID, product_category_names.ID, " +
@@ -182,17 +183,11 @@ namespace Vextech_API.Controllers
                             bool result = true;
                             foreach (var item in productEntiry.Images)
                             {
-                                if (item.PictureName == productImage.PictureName)
-                                {
-                                    result = false;
-                                }
+                                if (item.PictureName == productImage.PictureName) result = false;
                             }
 
-                            if (result)
-                            {
-                                productEntiry.Images.Add(productImage);
-                            }
-
+                            if (result) productEntiry.Images.Add(productImage);
+                            
                             return productEntiry;
                         }, splitOn: "Id,ProductID"//if the IDs in the database is not set to id den you can use ,splitOn:"insert the specific name instead" 
                         )
@@ -207,6 +202,7 @@ namespace Vextech_API.Controllers
             }
             catch (Exception)
             {
+                throw;
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
             }
         }
