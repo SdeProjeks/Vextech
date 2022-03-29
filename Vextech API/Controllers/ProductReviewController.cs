@@ -200,7 +200,7 @@ namespace Vextech_API.Controllers
                     ProductReviewModel data = new()
                     {
                         ProductID = productID,
-                        UserID = 1,
+                        UserID = userid,
                         Comment = comment,
                         Rating = rating,
                     };
