@@ -1,0 +1,15 @@
+﻿.BoxMaking {
+    border: solid 1.5px black;
+}
+
+.noPadding{
+    padding-left: 2px;
+}
+
+.noPadding li {
+    list-style-type: none;
+}
+
+.dashborder{
+    border-bottom: dashed 1.5px black;
+}

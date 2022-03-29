@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Vextech_API.DataAccess;
 using Vextech_API.Models;
 
@@ -44,5 +45,11 @@ namespace Vextech_API.Controllers
             string sql = @$"INSERT INTO logs (Message) VALUES (@Message)";
             SqlDataAccess.SaveData<LogsModel>(sql, data);
         }
+
+        //[HttpGet]
+        //public ActionResult<List<LogsModel>> GetLogs()
+        //{
+
+        //}
     }
 }

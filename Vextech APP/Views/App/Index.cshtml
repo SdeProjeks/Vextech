@@ -25,7 +25,7 @@
             <h1><a class="nav-link" asp-controller="App" asp-action="Contact">@Html.DisplayFor(modelItem => item.Name)</a></h1>
                 @if (item.Release_date != null)
                 {
-                    <p>Release Date: @Html.DisplayNameFor(model => model.Release_date)</p>
+                    <p>Release Date: @Html.DisplayFor(modelitem => item.Release_date)</p>
                 }
             <div class="mt-auto">
                 <p class="price">@Html.DisplayFor(modelItem => item.Price)€</p>

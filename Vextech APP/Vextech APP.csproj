@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <Folder Include="ViewModels\StorageModels\" />
-    <Folder Include="Views\Admin\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 

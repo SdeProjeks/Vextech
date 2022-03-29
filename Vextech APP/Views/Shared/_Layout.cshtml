@@ -47,7 +47,7 @@
 												<li><a class="dropdown-item" href="#">My Orders</a></li>
 												@if (Vextech_APP.Permissions.PermissionCheck("admin_panel_view", Context.Request.Cookies["session"]))
 												{
-													<li><a class="dropdown-item" href="#">Administration</a></li>
+													<li><a class="dropdown-item" href="@Url.ActionLink("index","Admin")">Administration</a></li>
 												}
 												<li><a class="dropdown-item" asp-controller="User" asp-action="Logout">Logout</a></li>
 											</ul>

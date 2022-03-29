@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Vextech_APP.ViewModels.ContactViewModel>
+
+@{
+    ViewBag.Title = "Admin pannel";
+}
+@Html.Partial("_AdminNavbar")
+
+<div class="col-1"></div>
+    <div class="col-8">
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <h4>@Html.DisplayNameFor(Model => Model.Name)</h4>
+                    </th>
+                    <th>
+                       <h4>@Html.DisplayNameFor(Model => Model.Email)</h4> 
+                    </th>
+                    <th>
+                       <h4>@Html.DisplayNameFor(Model => Model.Message)</h4>
+                    </th>
+                </tr>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><h5>@Html.DisplayFor(itemModel => item.Name)</h5></td>
+                        <td><h5>@Html.DisplayFor(itemModel => item.Email)</h5></td>
+                        <td><h5>@Html.DisplayFor(itemModel => item.Message)</h5></td>
+                    </tr>
+                }
+                
+            </thead>
+        </table>
+    </div>
+</div>
+</div>
